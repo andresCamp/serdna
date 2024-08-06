@@ -18,14 +18,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en">
       <body className={inter.className}>
-        <Providers>
+        {/* <Providers> */}
           <div className="absolute inset-0 -z-10 h-full w-full bg-white dark:bg-black bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:16px_16px]"></div>
           <SideNavBar/>
           {/* <ThemeToggle/> */}
           {children}
-        </Providers>
+        {/* </Providers> */}
       </body>
     </html>
   );
