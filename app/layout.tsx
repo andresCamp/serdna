@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
+import SideNavBar from "@/components/SideNavBar";
+import ThemeToggle from "@/lib/ThemeToggle";
+import { Providers } from "@/lib/providers";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -15,8 +18,15 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className={inter.className}>{children}</body>
+    <html lang="en" suppressHydrationWarning>
+      <body className={inter.className}>
+        <Providers>
+          <div className="absolute inset-0 -z-10 h-full w-full bg-white dark:bg-black bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:16px_16px]"></div>
+          <SideNavBar/>
+          {/* <ThemeToggle/> */}
+          {children}
+        </Providers>
+      </body>
     </html>
   );
 }
