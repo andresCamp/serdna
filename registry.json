@@ -1,0 +1,33 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry.json",
+  "name": "serdna",
+  "homepage": "https://serdna.dev",
+  "items": [
+    {
+      "name": "samara-input",
+      "type": "registry:component",
+      "title": "Samara Input",
+      "description": "A floating label input component with smooth animations.",
+      "registryDependencies": ["input"],
+      "files": [
+        {
+          "path": "registry/default/components/samara-input/samara-input.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "input",
+      "type": "registry:ui",
+      "title": "Input",
+      "description": "Base input component.",
+      "dependencies": ["@radix-ui/react-slot"],
+      "files": [
+        {
+          "path": "registry/default/ui/input/input.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    }
+  ]
+}

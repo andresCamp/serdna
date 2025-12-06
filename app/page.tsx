@@ -13,7 +13,7 @@ export default function Home() {
 
   return (
     <main className="flex min-h-screen flex-col gap-3 items-center justify-center p-24">
-      <SplitFlapDisplay />
+      {/* <SplitFlapDisplay /> */}
       <Title>Andrés Campos</Title>
       <p>Web developer using Next.js, TailwindCSS, and TypeScript</p>
 
