@@ -72,5 +72,53 @@
   }
   body {
     @apply bg-background text-foreground;
+    overflow-x: hidden;
+    background-color: #f5efe8;
   }
+}
+
+@keyframes portrait-float {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+  50% {
+    transform: translate3d(0, -10px, 0);
+  }
+}
+
+@keyframes shadow-float {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(0, 12px, 0) scale(0.95);
+  }
+}
+
+@keyframes ember-flicker {
+  0%,
+  100% {
+    opacity: 0.48;
+    transform: scale(0.98);
+    filter: blur(24px);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.03);
+    filter: blur(30px);
+  }
+}
+
+.hero-portrait-float {
+  animation: portrait-float 8s ease-in-out infinite;
+}
+
+.hero-shadow-drift {
+  animation: shadow-float 8s ease-in-out infinite;
+}
+
+.hero-smolder {
+  animation: ember-flicker 5.8s ease-in-out infinite;
 }

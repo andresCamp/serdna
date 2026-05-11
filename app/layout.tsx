@@ -21,7 +21,9 @@ export default function RootLayout({
     <html lang="en">
       <body className={inter.className}>
         {/* <Providers> */}
-          <div className="absolute inset-0 -z-10 h-full w-full bg-white dark:bg-black bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:16px_16px]"></div>
+          <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden bg-[#f5efe8]">
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.9),transparent_32%),radial-gradient(circle_at_20%_24%,rgba(210,138,95,0.18),transparent_24%),radial-gradient(circle_at_82%_20%,rgba(255,235,214,0.9),transparent_24%),linear-gradient(180deg,#f7f1ea_0%,#eee3d7_52%,#eadfd7_100%)]" />
+          </div>
           <SideNavBar/>
           {/* <ThemeToggle/> */}
           {children}
