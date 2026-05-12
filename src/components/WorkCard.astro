@@ -1,0 +1,29 @@
+---
+import type { ImageMetadata } from "astro";
+import { Image } from "astro:assets";
+
+interface Props {
+  href: string;
+  category: string;
+  title: string;
+  description?: string;
+  logo?: ImageMetadata;
+  class?: string;
+}
+
+const { href, category, title, description, logo, class: className } = Astro.props;
+---
+
+<a href={href} target="_blank" rel="noopener noreferrer" class:list={["group block rounded-3xl overflow-hidden relative", className]}>
+  <slot />
+  {logo && (
+    <div class="absolute inset-0 flex items-center justify-center z-10 pointer-events-none">
+      <Image src={logo} alt={`${title} logo`} class="w-16 h-16 md:w-20 md:h-20 object-contain drop-shadow-lg" />
+    </div>
+  )}
+  <div class="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black/60 to-transparent z-20">
+    <span class="text-[10px] text-white/70 uppercase tracking-widest">{category}</span>
+    <h3 class="text-lg font-semibold text-white mt-1">{title}</h3>
+    {description && <p class="text-sm text-white/80 mt-1">{description}</p>}
+  </div>
+</a>

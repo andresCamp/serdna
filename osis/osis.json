@@ -1,0 +1,33 @@
+{
+  "protocolShape": "1.0",
+  "type": "product",
+  "product": "serdna",
+  "activeVersion": "v3",
+  "anonId": "b6231db3-f271-4623-b420-0dc3e1364733",
+  "createdAt": "2026-04-07T00:00:00Z",
+  "lastTwinUpdate": "2026-04-04",
+  "files": {
+    "twin": "osis/twin.md",
+    "sessions": "osis/sessions.md",
+    "inbox": [],
+    "v1": {
+      "changelog": "osis/v1/changelog.md",
+      "systems": {
+        "core": {}
+      }
+    },
+    "v2": {
+      "changelog": "osis/v2/changelog.md",
+      "systems": {
+        "core": {}
+      }
+    },
+    "v3": {
+      "changelog": "osis/v3/changelog.md",
+      "systems": {
+        "core": {}
+      }
+    }
+  },
+  "modules": {}
+}

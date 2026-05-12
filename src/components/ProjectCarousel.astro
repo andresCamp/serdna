@@ -1,0 +1,28 @@
+---
+interface Props {
+  class?: string;
+}
+
+const { class: className = '' } = Astro.props;
+---
+
+<div class:list={['relative', className]}>
+  <div class="flex gap-4 overflow-x-auto scrollbar-hide snap-x snap-mandatory pb-4" data-carousel>
+    <slot />
+
+    <!-- CTA card -->
+    <a
+      href="/projects"
+      class="group flex-shrink-0 snap-start w-[280px] md:w-[340px] aspect-[4/5] rounded-2xl border border-dashed border-neutral-300 hover:border-neutral-400 transition-colors flex items-center justify-center"
+    >
+      <div class="text-center px-6">
+        <p class="text-base font-semibold text-neutral-400 group-hover:text-neutral-600 transition-colors">
+          See all projects
+        </p>
+        <svg class="w-5 h-5 mx-auto mt-2 text-neutral-300 group-hover:text-neutral-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+          <path d="M17 8l4 4m0 0l-4 4m4-4H3" />
+        </svg>
+      </div>
+    </a>
+  </div>
+</div>

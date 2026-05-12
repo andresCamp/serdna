@@ -1,0 +1,295 @@
+---
+import { Image } from "astro:assets";
+
+interface Stat {
+  value: string;
+  label: string;
+}
+
+interface Language {
+  name: string;
+  pct: number;
+  color?: string;
+}
+
+interface Link {
+  label: string;
+  href: string;
+  variant?: 'primary' | 'secondary';
+}
+
+interface Props {
+  title: string;
+  category: string;
+  description: string;
+  backstory?: string;
+  href: string;
+  links?: Link[];
+  logo?: ImageMetadata;
+  preview?: ImageMetadata;
+  video?: string;
+  techStack?: string[];
+  stats?: Stat[];
+  languages?: Language[];
+  titleFont?: string;
+  diagram?: string;
+  diagramLabel?: string;
+  imagePosition?: 'left' | 'right';
+  class?: string;
+}
+
+// Default colors per language (GitHub linguist palette).
+// Override per call site by passing `color` on the language object.
+const LANG_COLORS: Record<string, string> = {
+  TypeScript: '#3178c6',
+  JavaScript: '#f7df1e',
+  Python: '#3776ab',
+  Shell: '#89e051',
+  Bash: '#89e051',
+  Rust: '#dea584',
+  Go: '#00add8',
+  HTML: '#e34c26',
+  CSS: '#563d7c',
+  SQL: '#e38c00',
+  Astro: '#ff5d01',
+  Svelte: '#ff3e00',
+  MDX: '#1b1f24',
+  Markdown: '#083fa1',
+  Dockerfile: '#384d54',
+  YAML: '#cb171e',
+  JSON: '#292929',
+};
+
+// Map tech names → best available asset.
+// Prefer lockup (mark + wordmark) for more visual presence; fall back to
+// wordmark when no lockup exists. Pure marks are used only when the
+// lockup/wordmark SVG has bad internal padding that makes it render tiny
+// (e.g. OpenAI's wordmark has huge whitespace inside its viewBox).
+const TECH_ICONS: Record<string, string> = {
+  "Next.js": "/tech/nextjs-wordmark.svg",
+  "TypeScript": "/tech/typescript-wordmark.svg",
+  "LiveKit": "/tech/livekit-wordmark.svg",
+  "Twilio": "/tech/twilio-lockup.svg",
+  "Anthropic": "/tech/anthropic-wordmark.svg",
+  "OpenAI": "/tech/openai-wordmark.svg",
+  "Gemini": "/tech/gemini-lockup.png",
+  "Ably": "/tech/ably-lockup.svg",
+  "Neon": "/tech/neon-lockup.svg",
+  "Neo4j": "/tech/neo4j-lockup.svg",
+  "Mux": "/tech/mux-wordmark.svg",
+  "Stripe": "/tech/stripe-wordmark.svg",
+  "PydanticAI": "/tech/pydantic-lockup.svg",
+  "Inngest": "/tech/inngest-lockup.svg",
+  "NestJS": "/tech/nestjs-lockup.svg",
+  "Hono": "/tech/hono-lockup.png",
+  "Markdown": "/tech/markdown.svg",
+};
+
+// Per-icon max-width overrides in pixels. Use when a logo's natural
+// aspect ratio makes it dominate the pill at the default 72px cap.
+const TECH_ICON_MAX_W: Record<string, number> = {
+  "Next.js": 60,
+  "Mux": 44,
+  "Neon": 48,
+  "Inngest": 56,
+  "OpenAI": 52,
+};
+
+const {
+  title,
+  category,
+  description,
+  backstory,
+  href,
+  links,
+  logo,
+  preview,
+  video,
+  techStack = [],
+  stats = [],
+  languages = [],
+  titleFont,
+  diagram,
+  diagramLabel,
+  imagePosition = 'left',
+  class: className = '',
+} = Astro.props;
+
+// Resolve link list — fall back to the legacy single `href` if no `links` array passed.
+const resolvedLinks: Link[] =
+  links && links.length > 0
+    ? links
+    : [{ label: 'View project', href, variant: 'primary' }];
+---
+
+<div class:list={['grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 items-center py-16 lg:py-24', className]}>
+  <!-- Image side -->
+  <div class:list={[
+    'featured-image group/img relative aspect-[4/3] rounded-2xl overflow-hidden bg-neutral-100 cursor-pointer',
+    imagePosition === 'right' ? 'lg:order-2' : '',
+  ]}>
+    <!-- Product image/video layer -->
+    <div class="absolute inset-0 transition-opacity duration-500 group-hover/img:opacity-0">
+      {video ? (
+        <video autoplay muted loop playsinline class="absolute inset-0 w-full h-full object-cover">
+          <source src={video} type="video/mp4" />
+        </video>
+      ) : preview ? (
+        <Image src={preview} alt={title} class="absolute inset-0 w-full h-full object-cover" />
+      ) : (
+        <div class="absolute inset-0 bg-gradient-to-br from-neutral-200 to-neutral-300"></div>
+      )}
+
+      <!-- Gradient overlay for readability -->
+      <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent"></div>
+
+      <!-- Logo centered -->
+      {logo && (
+        <div class="absolute inset-0 flex items-center justify-center z-10 pointer-events-none">
+          <Image src={logo} alt={`${title} logo`} class="w-24 h-24 md:w-32 md:h-32 object-contain drop-shadow-lg" />
+        </div>
+      )}
+    </div>
+
+    <!-- Architecture diagram layer (shown on hover) -->
+    {diagram && (
+      <div class="absolute inset-0 bg-white flex flex-col justify-center items-center px-6 md:px-10 opacity-0 transition-opacity duration-500 group-hover/img:opacity-100">
+        {diagramLabel && (
+          <p class="text-[10px] uppercase tracking-[0.2em] text-neutral-400 font-medium mb-4">{diagramLabel}</p>
+        )}
+        <pre class="text-[11px] md:text-[13px] leading-relaxed text-neutral-800 font-mono whitespace-pre" set:text={diagram} />
+      </div>
+    )}
+
+    <!-- Tech stack at bottom of image -->
+    {techStack.length > 0 && (
+      <div class="absolute bottom-0 left-0 right-0 z-10 px-4 pb-4 transition-opacity duration-500 group-hover/img:opacity-0">
+        <div class="flex flex-wrap items-center gap-2">
+          {techStack.map((tech) => {
+            const iconSrc = TECH_ICONS[tech];
+            const iconMaxW = TECH_ICON_MAX_W[tech];
+            return iconSrc ? (
+              <div
+                class="inline-flex items-center justify-center h-7 w-24 bg-white/15 backdrop-blur-sm rounded-full"
+                title={tech}
+                aria-label={tech}
+              >
+                <img
+                  src={iconSrc}
+                  alt={tech}
+                  style={iconMaxW ? `max-width: ${iconMaxW}px` : undefined}
+                  class="tech-icon max-h-4 max-w-[72px] w-auto h-auto object-contain"
+                  loading="lazy"
+                  decoding="async"
+                />
+              </div>
+            ) : (
+              <span class="inline-flex items-center justify-center h-7 w-24 text-[11px] font-medium text-white/90 bg-white/15 backdrop-blur-sm rounded-full">
+                {tech}
+              </span>
+            );
+          })}
+        </div>
+      </div>
+    )}
+  </div>
+
+  <!-- Text side -->
+  <div class:list={[imagePosition === 'right' ? 'lg:order-1' : '']}>
+    <p class="text-[10px] uppercase tracking-[0.2em] text-neutral-400 font-medium mb-3">
+      {category}
+    </p>
+    <h3
+      class="text-2xl md:text-4xl font-bold tracking-tight text-neutral-900 leading-tight"
+      style={titleFont ? `font-family: ${titleFont}` : undefined}
+    >
+      {title}
+    </h3>
+
+    <p class="mt-4 text-base text-neutral-600 leading-relaxed max-w-md">
+      {description}
+    </p>
+    {backstory && (
+      <p class="mt-3 text-base text-neutral-500 leading-relaxed max-w-md italic">
+        {backstory}
+      </p>
+    )}
+
+    {stats.length > 0 && (
+      <div class="mt-6 grid grid-cols-2 sm:grid-cols-4 gap-4 max-w-md">
+        {stats.map((stat) => (
+          <div>
+            <div class="text-2xl font-bold tracking-tight text-neutral-900 leading-none">
+              {stat.value}
+            </div>
+            <div class="text-[11px] text-neutral-400 font-mono mt-1 uppercase tracking-wider">
+              {stat.label}
+            </div>
+          </div>
+        ))}
+      </div>
+    )}
+
+    {languages.length > 0 && (
+      <div class="mt-6 flex items-center w-full max-w-md">
+        {languages.map((lang) => {
+          const color = lang.color || LANG_COLORS[lang.name] || '#9ca3af';
+          return (
+            <div
+              class="flex items-center gap-2 min-w-0"
+              style={`flex: ${lang.pct} ${lang.pct} 0%`}
+            >
+              <div
+                class="h-px flex-1 min-w-[8px]"
+                style={`background-color: ${color}`}
+              />
+              <span
+                class="text-[10px] font-mono uppercase tracking-wider whitespace-nowrap"
+                style={`color: ${color}`}
+              >
+                {lang.name}
+              </span>
+            </div>
+          );
+        })}
+      </div>
+    )}
+
+    <div class="mt-6 flex flex-wrap items-center gap-x-6 gap-y-2">
+      {resolvedLinks.map((link, i) => {
+        const isPrimary = link.variant ? link.variant === 'primary' : i === 0;
+        return (
+          <a
+            href={link.href}
+            target="_blank"
+            rel="noopener noreferrer"
+            class:list={[
+              'group/link inline-flex items-center gap-1.5 text-sm transition-colors duration-300',
+              isPrimary
+                ? 'text-neutral-900 font-medium'
+                : 'text-neutral-500 hover:text-neutral-900',
+            ]}
+          >
+            {link.label}
+            <svg
+              class="w-3.5 h-3.5 transition-transform duration-300 ease-out group-hover/link:-rotate-45"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              stroke-width="2"
+            >
+              <path d="M7 17L17 7M17 7H7M17 7v10" />
+            </svg>
+          </a>
+        );
+      })}
+    </div>
+  </div>
+</div>
+
+<style>
+  /* Force all tech icons to monochrome white for a uniform look on the dark overlay. */
+  .tech-icon {
+    filter: brightness(0) invert(1);
+  }
+</style>

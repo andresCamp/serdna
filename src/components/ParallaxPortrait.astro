@@ -1,0 +1,317 @@
+---
+interface Props {
+  src: string;
+  depthSrc: string;
+  alt?: string;
+  class?: string;
+}
+
+const { src, depthSrc, alt = "Portrait", class: className = "" } = Astro.props;
+---
+
+<div class:list={["parallax-portrait-wrapper", className]}>
+  <canvas
+    data-parallax-canvas
+    data-portrait={src}
+    data-depth={depthSrc}
+    aria-label={alt}
+    role="img"
+  ></canvas>
+</div>
+
+<style>
+  .parallax-portrait-wrapper {
+    --shadow-offset-x: 0px;
+    --shadow-offset-y: 26px;
+    --shadow-far-offset-x: 0px;
+    --shadow-far-offset-y: 44px;
+    --shadow-blur-near: 28px;
+    --shadow-blur-far: 64px;
+    width: 563px;
+    height: 656px;
+    position: relative;
+    isolation: isolate;
+  }
+
+  @media (min-width: 768px) {
+    .parallax-portrait-wrapper {
+      width: 688px;
+      height: 813px;
+    }
+  }
+
+  canvas[data-parallax-canvas] {
+    width: 100%;
+    height: 100%;
+    display: block;
+    position: relative;
+    z-index: 1;
+    will-change: filter;
+    filter:
+      drop-shadow(var(--shadow-offset-x) var(--shadow-offset-y) var(--shadow-blur-near) rgba(15, 23, 42, 0.16))
+      drop-shadow(var(--shadow-far-offset-x) var(--shadow-far-offset-y) var(--shadow-blur-far) rgba(15, 23, 42, 0.09));
+  }
+</style>
+
+<script>
+  // ── Parallax tuning knobs ──────────────────────────────────
+  // Overscan: how much the image is zoomed/cropped to hide edges.
+  // Lower = more zoom = hides more fraying. Range: 0.80–1.0
+  const OVERSCAN = 0.90;
+
+  // Edge fade width: smoothstep ramp that kills displacement near UV borders.
+  // Wider = softer falloff = less stretching artifacts. Range: 0.05–0.30
+  const EDGE_FADE = 0.15;
+
+  // Depth blur radius (px): pre-blur on the depth mask canvas.
+  // Higher = smoother depth gradients = less harsh edge artifacts. Range: 10–40
+  const DEPTH_BLUR_RADIUS = 30;
+
+  // Displacement intensity: how far pixels shift on mouse move.
+  // Lower = subtler effect = less edge fraying. Range: 0.01–0.06
+  const INTENSITY = 0.02;
+
+  // Mouse lerp speed: smoothing factor for mouse tracking.
+  // Lower = more lag/smoothness. Range: 0.02–0.15
+  const LERP_SPEED = 0.06;
+  // ────────────────────────────────────────────────────────────
+
+  const VERTEX_SRC = `
+    attribute vec2 a_position;
+    varying vec2 v_uv;
+    void main() {
+      v_uv = a_position * 0.5 + 0.5;
+      v_uv.y = 1.0 - v_uv.y;
+      gl_Position = vec4(a_position, 0.0, 1.0);
+    }
+  `;
+
+  // Clean shader — depth map is pre-blurred, no need for in-shader blur
+  const FRAGMENT_SRC = `
+    precision mediump float;
+    varying vec2 v_uv;
+    uniform sampler2D u_portrait;
+    uniform sampler2D u_depth;
+    uniform vec2 u_mouse;
+    uniform float u_intensity;
+
+    void main() {
+      // Overscan: zoom/crop to hide edge pixels (tuned via OVERSCAN)
+      float overscan = ${OVERSCAN.toFixed(2)};
+      vec2 uv = (v_uv - 0.5) * overscan + 0.5;
+
+      // Depth is already a smooth gradient from the pre-blur
+      float depth = texture2D(u_depth, uv).r;
+
+      // Edge fade: ramp displacement to zero near borders (tuned via EDGE_FADE)
+      float ef = ${EDGE_FADE.toFixed(2)};
+      float edgeFade = smoothstep(0.0, ef, uv.x)
+                     * smoothstep(1.0, 1.0 - ef, uv.x)
+                     * smoothstep(0.0, ef, uv.y)
+                     * smoothstep(1.0, 1.0 - ef, uv.y);
+
+      // Displace — attenuated at edges
+      vec2 offset = u_mouse * depth * u_intensity * edgeFade;
+      vec2 displaced_uv = clamp(uv + offset, 0.0, 1.0);
+
+      vec4 color = texture2D(u_portrait, displaced_uv);
+
+      // Subtle directional light
+      float light = 1.0 + dot(u_mouse, vec2(0.3, 0.2)) * depth * 0.08;
+      color.rgb *= light;
+
+      gl_FragColor = color;
+    }
+  `;
+
+  function loadImage(src: string): Promise<HTMLImageElement> {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.crossOrigin = "anonymous";
+      img.onload = () => resolve(img);
+      img.onerror = reject;
+      img.src = src;
+    });
+  }
+
+  /**
+   * Pre-blur the depth map on a 2D canvas using the native CSS filter.
+   * This gives us a true heavy Gaussian blur (arbitrary radius)
+   * that dissolves hard mask edges into smooth gradients.
+   * One-time cost at load — not per frame.
+   */
+  function blurDepthMap(img: HTMLImageElement, radius: number): HTMLCanvasElement {
+    const c = document.createElement("canvas");
+    c.width = img.width;
+    c.height = img.height;
+    const ctx = c.getContext("2d")!;
+
+    // Apply heavy Gaussian blur
+    ctx.filter = `blur(${radius}px)`;
+
+    // Draw slightly oversized to prevent blur darkening at edges
+    const pad = radius * 2;
+    ctx.drawImage(img, -pad, -pad, img.width + pad * 2, img.height + pad * 2);
+
+    return c;
+  }
+
+  function createShader(gl: WebGLRenderingContext, type: number, source: string): WebGLShader | null {
+    const shader = gl.createShader(type);
+    if (!shader) return null;
+    gl.shaderSource(shader, source);
+    gl.compileShader(shader);
+    if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+      console.error("Shader compile error:", gl.getShaderInfoLog(shader));
+      gl.deleteShader(shader);
+      return null;
+    }
+    return shader;
+  }
+
+  function createTexture(gl: WebGLRenderingContext, source: HTMLImageElement | HTMLCanvasElement): WebGLTexture | null {
+    const tex = gl.createTexture();
+    gl.bindTexture(gl.TEXTURE_2D, tex);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, source);
+    return tex;
+  }
+
+  async function initParallaxCanvas(canvas: HTMLCanvasElement) {
+    const portraitSrc = canvas.dataset.portrait!;
+    const depthSrc = canvas.dataset.depth!;
+    const wrapper = canvas.closest(".parallax-portrait-wrapper") as HTMLDivElement | null;
+
+    const gl = canvas.getContext("webgl", { alpha: true, premultipliedAlpha: false });
+    if (!gl) return;
+
+    const [portraitImg, depthImg] = await Promise.all([
+      loadImage(portraitSrc),
+      loadImage(depthSrc),
+    ]);
+
+    // Pre-blur the depth map — dissolves hard mask edges (tuned via DEPTH_BLUR_RADIUS)
+    const blurredDepth = blurDepthMap(depthImg, DEPTH_BLUR_RADIUS);
+
+    const dpr = Math.min(window.devicePixelRatio, 2);
+    canvas.width = canvas.clientWidth * dpr;
+    canvas.height = canvas.clientHeight * dpr;
+    gl.viewport(0, 0, canvas.width, canvas.height);
+
+    const vert = createShader(gl, gl.VERTEX_SHADER, VERTEX_SRC);
+    const frag = createShader(gl, gl.FRAGMENT_SHADER, FRAGMENT_SRC);
+    if (!vert || !frag) return;
+
+    const program = gl.createProgram()!;
+    gl.attachShader(program, vert);
+    gl.attachShader(program, frag);
+    gl.linkProgram(program);
+    if (!gl.getProgramParameter(program, gl.LINK_STATUS)) return;
+
+    gl.useProgram(program);
+
+    const posBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, posBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([
+      -1, -1, 1, -1, -1, 1,
+      -1, 1, 1, -1, 1, 1,
+    ]), gl.STATIC_DRAW);
+
+    const aPos = gl.getAttribLocation(program, "a_position");
+    gl.enableVertexAttribArray(aPos);
+    gl.vertexAttribPointer(aPos, 2, gl.FLOAT, false, 0, 0);
+
+    // Portrait texture from image, depth texture from the pre-blurred canvas
+    const portraitTex = createTexture(gl, portraitImg);
+    const depthTex = createTexture(gl, blurredDepth);
+
+    const uMouse = gl.getUniformLocation(program, "u_mouse");
+    const uIntensity = gl.getUniformLocation(program, "u_intensity");
+
+    gl.uniform1i(gl.getUniformLocation(program, "u_portrait"), 0);
+    gl.uniform1i(gl.getUniformLocation(program, "u_depth"), 1);
+
+    gl.activeTexture(gl.TEXTURE0);
+    gl.bindTexture(gl.TEXTURE_2D, portraitTex);
+    gl.activeTexture(gl.TEXTURE1);
+    gl.bindTexture(gl.TEXTURE_2D, depthTex);
+
+    gl.enable(gl.BLEND);
+    gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+
+    let targetX = 0;
+    let targetY = 0;
+    let currentX = 0;
+    let currentY = 0;
+    // Displacement + smoothing (tuned via top-level constants)
+
+    function syncShadow() {
+      if (!wrapper) return;
+
+      const nearX = currentX * -10;
+      const nearY = 26 + currentY * -8;
+      const farX = currentX * -22;
+      const farY = 44 + currentY * -14;
+      const blurNear = 28 + Math.abs(currentX) * 6 + Math.abs(currentY) * 6;
+      const blurFar = 64 + Math.abs(currentX) * 10 + Math.abs(currentY) * 10;
+
+      wrapper.style.setProperty("--shadow-offset-x", `${nearX.toFixed(2)}px`);
+      wrapper.style.setProperty("--shadow-offset-y", `${nearY.toFixed(2)}px`);
+      wrapper.style.setProperty("--shadow-far-offset-x", `${farX.toFixed(2)}px`);
+      wrapper.style.setProperty("--shadow-far-offset-y", `${farY.toFixed(2)}px`);
+      wrapper.style.setProperty("--shadow-blur-near", `${blurNear.toFixed(2)}px`);
+      wrapper.style.setProperty("--shadow-blur-far", `${blurFar.toFixed(2)}px`);
+    }
+
+
+    function render() {
+      currentX += (targetX - currentX) * LERP_SPEED;
+      currentY += (targetY - currentY) * LERP_SPEED;
+      syncShadow();
+
+      gl.clearColor(0, 0, 0, 0);
+      gl.clear(gl.COLOR_BUFFER_BIT);
+
+      gl.uniform2f(uMouse, currentX, currentY);
+      gl.uniform1f(uIntensity, INTENSITY);
+
+      gl.drawArrays(gl.TRIANGLES, 0, 6);
+      requestAnimationFrame(render);
+    }
+
+    // Entire viewport drives the parallax
+    document.addEventListener("mousemove", (e: MouseEvent) => {
+      const vw = window.innerWidth;
+      const vh = window.innerHeight;
+
+      // Normalize to -1…1 from viewport center
+      let nx = (e.clientX - vw / 2) / (vw / 2);
+      let ny = (e.clientY - vh / 2) / (vh / 2);
+
+      // Clamp
+      targetX = Math.max(-0.8, Math.min(0.8, nx));
+      targetY = Math.max(-0.8, Math.min(0.8, ny));
+    });
+
+    const ro = new ResizeObserver(() => {
+      const d = Math.min(window.devicePixelRatio, 2);
+      canvas.width = canvas.clientWidth * d;
+      canvas.height = canvas.clientHeight * d;
+      gl.viewport(0, 0, canvas.width, canvas.height);
+    });
+    ro.observe(canvas);
+
+    syncShadow();
+    render();
+  }
+
+  function initAll() {
+    document.querySelectorAll<HTMLCanvasElement>("[data-parallax-canvas]").forEach(initParallaxCanvas);
+  }
+
+  initAll();
+  document.addEventListener("astro:after-swap", initAll);
+</script>
