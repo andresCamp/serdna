@@ -1,0 +1,95 @@
+---
+import Layout from "../layouts/Layout.astro";
+import "../styles/global.css";
+import { Image } from "astro:assets";
+import WorkCard from "../components/WorkCard.astro";
+
+import mystoryImg from "../assets/work/mystory/preview.png";
+import mystoryLogo from "../assets/work/mystory/logo.svg";
+import envoyImg from "../assets/work/envoy/preview.png";
+import envoyLogo from "../assets/work/envoy/logo.svg";
+import rptImg from "../assets/work/rpt/preview.png";
+import rptLogo from "../assets/work/rpt/logo.svg";
+import deepmeshLogo from "../assets/work/deepmesh/logo.svg";
+import icHeroDhow from "../assets/work/initialcommit/hero-dhow.webp";
+import icHeroDunes from "../assets/work/initialcommit/hero-dunes.jpeg";
+import icHeroMangroves from "../assets/work/initialcommit/hero-mangroves.jpeg";
+---
+
+<Layout title="Projects — Andrés Campos">
+  <section class="py-16 px-4">
+    <div class="px-4 mb-12">
+      <h1 class="text-3xl md:text-4xl font-bold tracking-tight text-neutral-900">
+        Projects
+      </h1>
+      <p class="mt-3 text-sm text-neutral-500 max-w-md leading-relaxed">
+        Everything I've shipped. Products, tools, client work, and experiments.
+      </p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 md:grid-rows-[35vh_35vh_220px] gap-4">
+
+      <!-- Col 1, r1-2: MyStory -->
+      <WorkCard href="https://mystory.bio" category="AI Platform" title="MyStory" description="AI life story platform — voice interviews become structured biographical content" logo={mystoryLogo} class="row-span-2">
+        <Image src={mystoryImg} alt="MyStory" class="h-full w-full object-cover" />
+      </WorkCard>
+
+      <!-- Col 2, r1-3: IC + Envoy -->
+      <div class="row-span-3 flex flex-col gap-4">
+        <WorkCard href="https://initialcommit.ae" category="Community" title="InitialCommit" description="Abu Dhabi's builder community — events, brand, platform" class="flex-1">
+          <div class="ic-cycle absolute inset-0">
+            <Image src={icHeroDhow} alt="InitialCommit — Dhow" class="absolute inset-0 h-full w-full object-cover opacity-100 transition-opacity duration-[1800ms] ease-[cubic-bezier(0.4,0,0.2,1)]" />
+            <Image src={icHeroDunes} alt="InitialCommit — Dunes" class="absolute inset-0 h-full w-full object-cover opacity-0 transition-opacity duration-[1800ms] ease-[cubic-bezier(0.4,0,0.2,1)]" />
+            <Image src={icHeroMangroves} alt="InitialCommit — Mangroves" class="absolute inset-0 h-full w-full object-cover opacity-0 transition-opacity duration-[1800ms] ease-[cubic-bezier(0.4,0,0.2,1)]" />
+          </div>
+          <div class="absolute inset-0 bg-gradient-to-tr from-[#09090B]/75 via-[#09090B]/50 to-transparent"></div>
+          <div class="absolute inset-0 bg-gradient-to-t from-[#09090B]/65 via-[#09090B]/10 to-transparent"></div>
+          <div class="absolute inset-0 flex items-center justify-center z-10 pointer-events-none">
+            <div class="flex items-center gap-2">
+              <span class="w-4 h-4 rounded-full bg-[#22E58B]"></span>
+              <span class="text-white text-lg font-medium tracking-tight drop-shadow-lg" style="font-family: 'JetBrains Mono', monospace;">initialcommit</span>
+            </div>
+          </div>
+        </WorkCard>
+        <WorkCard href="https://envoy.cd" category="Enterprise SaaS" title="Envoy" description="Sovereign AI for diplomatic communications" class="flex-1">
+          <Image src={envoyImg} alt="Envoy" class="h-full w-full object-cover" />
+          <div class="absolute inset-0 flex items-center justify-center z-10 pointer-events-none">
+            <Image src={envoyLogo} alt="Envoy logo" class="w-28 md:w-32 object-contain" />
+          </div>
+        </WorkCard>
+      </div>
+
+      <!-- Col 3, r1-3: DeepMesh (full height) -->
+      <div class="row-span-3">
+        <WorkCard href="https://deepmesh.io" category="AI Research · 4th Place Hackathon" title="DeepMesh" description="WhatsApp-native research platform — built in 3 weeks" logo={deepmeshLogo} class="h-full bg-neutral-800">
+          <video autoplay muted loop playsinline class="absolute inset-0 w-full h-full object-cover">
+            <source src="https://pub-6da53ee3f33348379907ddae4ddf31dc.r2.dev/deepmesh.mp4" type="video/mp4" />
+          </video>
+        </WorkCard>
+      </div>
+
+      <!-- Col 1, r3: RPT -->
+      <WorkCard href="https://www.rotatingpower.net/" category="Client Work" title="RPT" description="Bilingual EN/AR marketing — full RTL, custom i18n" class="">
+        <Image src={rptImg} alt="Rotating Power Technologies" class="h-full w-full object-cover" />
+        <div class="absolute inset-0 flex items-center justify-center z-10 pointer-events-none">
+          <Image src={rptLogo} alt="RPT logo" class="w-40 md:w-48 object-contain" />
+        </div>
+      </WorkCard>
+
+    </div>
+  </section>
+</Layout>
+
+<!-- IC image carousel -->
+<script>
+  const cycle = document.querySelector('.ic-cycle');
+  if (cycle) {
+    const imgs = cycle.querySelectorAll(':scope > img, :scope > picture > img');
+    let current = 0;
+    setInterval(() => {
+      imgs[current].classList.replace('opacity-100', 'opacity-0');
+      current = (current + 1) % imgs.length;
+      imgs[current].classList.replace('opacity-0', 'opacity-100');
+    }, 6000);
+  }
+</script>

@@ -1,0 +1,300 @@
+---
+// AsciiHero.astro
+//
+// Variable-typographic ASCII art behind the hero portrait.
+// Faithful port of chenglou's variable-typographic-ascii demo
+//   https://chenglou.me/pretext/variable-typographic-ascii/
+//   https://github.com/chenglou/pretext/blob/main/pages/demos/variable-typographic-ascii.ts
+//
+// Particles + 2 attractors drive a brightness field with decay trails.
+// Characters are chosen by brightness AND proportional width via @chenglou/pretext,
+// rendered as Georgia at 3 weights × normal/italic.
+//
+// Adapted only for: full-bleed sizing to viewport, soft neutral grey colour
+// instead of warm gold, smaller font size (~11px). Strip the source-canvas and
+// monospace panels — only the proportional ASCII output is rendered into the hero.
+---
+
+<div
+  id="ascii-hero"
+  class="absolute inset-0 pointer-events-none overflow-hidden hidden md:block"
+  aria-hidden="true"
+>
+  <div
+    id="ascii-grid"
+    class="absolute inset-0 flex flex-col items-stretch justify-start"
+  ></div>
+</div>
+
+<style>
+  .ascii-row {
+    display: block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-align: center;
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 11px;
+    line-height: 13px;
+  }
+
+  .w3 { font-weight: 300; }
+  .w5 { font-weight: 500; }
+  .w8 { font-weight: 800; }
+  .it { font-style: italic; }
+
+  /* Neutral grey at very low alpha — matches the Lando Norris reference background.
+     Soft fade across 10 buckets so contour edges dissolve smoothly into white space. */
+  .a1  { color: rgba(115, 115, 115, 0.04); }
+  .a2  { color: rgba(115, 115, 115, 0.07); }
+  .a3  { color: rgba(115, 115, 115, 0.10); }
+  .a4  { color: rgba(115, 115, 115, 0.13); }
+  .a5  { color: rgba(115, 115, 115, 0.16); }
+  .a6  { color: rgba(115, 115, 115, 0.19); }
+  .a7  { color: rgba(115, 115, 115, 0.22); }
+  .a8  { color: rgba(115, 115, 115, 0.25); }
+  .a9  { color: rgba(115, 115, 115, 0.28); }
+  .a10 { color: rgba(115, 115, 115, 0.32); }
+</style>
+
+<script>
+  import { prepareWithSegments } from "@chenglou/pretext";
+
+  // Feature flag: only run if ?ascii=1 is in the URL.
+  if (new URLSearchParams(location.search).get("ascii") !== "1") {
+    // no-op — leave the empty container in the DOM
+  } else {
+    runAsciiHero();
+  }
+
+  function runAsciiHero() {
+  // ============================================================
+  // CONFIG
+  // ============================================================
+  const FONT_SIZE = 11;
+  const LINE_HEIGHT = 13;
+  const PROP_FAMILY = 'Georgia, Palatino, "Times New Roman", serif';
+
+  // Render grid: cols and rows scale to fill the viewport (full-bleed).
+  const AVG_CELL_W = 5.6; // empirical for Georgia 11px proportional
+  const COLS = Math.max(60, Math.ceil(window.innerWidth / AVG_CELL_W));
+  const ROWS = Math.max(30, Math.ceil(window.innerHeight / LINE_HEIGHT));
+  const TARGET_ROW_W = window.innerWidth;
+
+  const FIELD_OVERSAMPLE = 2;
+  const FIELD_COLS = COLS * FIELD_OVERSAMPLE;
+  const FIELD_ROWS = ROWS * FIELD_OVERSAMPLE;
+
+  // ----- Topographic contour field -----
+  // A scalar field f(x, y, t) → [0, 1] is computed per cell as a sum of slow
+  // sine waves at different frequencies and orientations. Each frame, every
+  // cell checks its distance to the nearest of N target contour values; cells
+  // within CONTOUR_BAND of any contour render a Georgia char with alpha based
+  // on (1 - distance/band). Everything else is white space. The field's time
+  // parameter advances slowly, drifting the contours like a weather map.
+
+  // Contour values: where the field has to equal for a contour line to appear.
+  // 5 values gives 5 nested closed-curve families.
+  const CONTOUR_VALUES = [0.20, 0.36, 0.50, 0.64, 0.80];
+  // How wide a band around each contour renders chars. Smaller = thinner lines.
+  const CONTOUR_BAND = 0.045;
+  // How fast the field drifts. Smaller = slower. ~0.0001 ≈ a full cycle in 60s.
+  const FIELD_DRIFT_OMEGA = 0.00012;
+  // Field spatial frequencies (controls "blob size" of the contour shapes).
+  // Lower = larger blobs.
+  const FIELD_FREQ_X = 2.6;
+  const FIELD_FREQ_Y = 2.2;
+  const FIELD_FREQ_DIAG_1 = 1.9;
+  const FIELD_FREQ_DIAG_2 = 2.4;
+
+  const CHARSET =
+    " .,:;!+-=*#@%&abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+  const WEIGHTS = [300, 500, 800] as const;
+  const STYLES = ["normal", "italic"] as const;
+  type StyleVariant = (typeof STYLES)[number];
+
+  type PaletteEntry = {
+    char: string;
+    weight: number;
+    style: StyleVariant;
+    width: number;
+    brightness: number;
+  };
+
+  // (no orb type — the contour field is computed analytically per cell each frame)
+
+  // ============================================================
+  // PALETTE: brightness + proportional width for every char × weight × style
+  // ============================================================
+  const brightnessCanvas = document.createElement("canvas");
+  brightnessCanvas.width = 28;
+  brightnessCanvas.height = 28;
+  const bCtx = brightnessCanvas.getContext("2d", { willReadFrequently: true });
+  if (!bCtx) throw new Error("[AsciiHero] no 2d context for brightness probe");
+
+  function estimateBrightness(ch: string, font: string): number {
+    const size = 28;
+    bCtx.clearRect(0, 0, size, size);
+    bCtx.font = font;
+    bCtx.fillStyle = "#fff";
+    bCtx.textBaseline = "middle";
+    bCtx.fillText(ch, 1, size / 2);
+    const data = bCtx.getImageData(0, 0, size, size).data;
+    let sum = 0;
+    for (let i = 3; i < data.length; i += 4) sum += data[i]!;
+    return sum / (255 * size * size);
+  }
+
+  function measureWidth(ch: string, font: string): number {
+    const prepared = prepareWithSegments(ch, font);
+    return prepared.widths.length > 0 ? prepared.widths[0]! : 0;
+  }
+
+  const palette: PaletteEntry[] = [];
+  for (const style of STYLES) {
+    for (const weight of WEIGHTS) {
+      const font = `${style === "italic" ? "italic " : ""}${weight} ${FONT_SIZE}px ${PROP_FAMILY}`;
+      for (const ch of CHARSET) {
+        if (ch === " ") continue;
+        const width = measureWidth(ch, font);
+        if (width <= 0) continue;
+        const brightness = estimateBrightness(ch, font);
+        palette.push({ char: ch, weight, style, width, brightness });
+      }
+    }
+  }
+
+  const maxBrightness = Math.max(...palette.map((p) => p.brightness));
+  if (maxBrightness > 0) for (const p of palette) p.brightness /= maxBrightness;
+  palette.sort((a, b) => a.brightness - b.brightness);
+
+  const targetCellW = TARGET_ROW_W / COLS;
+
+  function findBest(targetBrightness: number): PaletteEntry {
+    let lo = 0;
+    let hi = palette.length - 1;
+    while (lo < hi) {
+      const mid = (lo + hi) >> 1;
+      if (palette[mid]!.brightness < targetBrightness) lo = mid + 1;
+      else hi = mid;
+    }
+    let bestScore = Infinity;
+    let best = palette[lo]!;
+    const start = Math.max(0, lo - 15);
+    const end = Math.min(palette.length, lo + 15);
+    for (let i = start; i < end; i++) {
+      const e = palette[i]!;
+      const bErr = Math.abs(e.brightness - targetBrightness) * 2.5;
+      const wErr = Math.abs(e.width - targetCellW) / targetCellW;
+      const score = bErr + wErr;
+      if (score < bestScore) {
+        bestScore = score;
+        best = e;
+      }
+    }
+    return best;
+  }
+
+  function esc(ch: string): string {
+    if (ch === "<") return "&lt;";
+    if (ch === ">") return "&gt;";
+    if (ch === "&") return "&amp;";
+    if (ch === '"') return "&quot;";
+    return ch;
+  }
+
+  function wCls(weight: number, style: StyleVariant): string {
+    const w = weight === 300 ? "w3" : weight === 500 ? "w5" : "w8";
+    return style === "italic" ? `${w} it` : w;
+  }
+
+  // Precompute 256 brightness levels → ready-to-insert HTML span
+  const brightnessLookup: string[] = new Array(256);
+  for (let b = 0; b < 256; b++) {
+    const brightness = b / 255;
+    if (brightness < 0.03) {
+      brightnessLookup[b] = " ";
+      continue;
+    }
+    const match = findBest(brightness);
+    const alphaIndex = Math.max(1, Math.min(10, Math.round(brightness * 10)));
+    brightnessLookup[b] = `<span class="${wCls(match.weight, match.style)} a${alphaIndex}">${esc(match.char)}</span>`;
+  }
+
+  // ============================================================
+  // SCALAR FIELD — sum-of-sines, returns a value in [0, 1] for any (x, y, t).
+  // x, y are normalized to [0, 1] across the canvas. t is milliseconds.
+  // The four sine components have different frequencies and orientations so
+  // they don't form a regular grid pattern; the result is organic blobby
+  // contours that drift over time as t advances.
+  // ============================================================
+  function scalarField(x: number, y: number, t: number): number {
+    const tt = t * FIELD_DRIFT_OMEGA;
+    const v =
+      Math.sin(x * FIELD_FREQ_X + tt) +
+      Math.sin(y * FIELD_FREQ_Y + tt * 1.3 + 0.7) +
+      Math.sin((x + y * 0.7) * FIELD_FREQ_DIAG_1 + tt * 0.9 + 1.4) +
+      Math.sin((x * 0.6 - y) * FIELD_FREQ_DIAG_2 + tt * 1.1 + 2.3);
+    // v ∈ [-4, 4] → map to [0, 1]
+    return (v + 4) / 8;
+  }
+
+  // ============================================================
+  // DOM SETUP
+  // ============================================================
+  const grid = document.getElementById("ascii-grid");
+  if (!grid) throw new Error("[AsciiHero] #ascii-grid not found");
+
+  const rowNodes: HTMLDivElement[] = [];
+  for (let r = 0; r < ROWS; r++) {
+    const row = document.createElement("div");
+    row.className = "ascii-row";
+    grid.appendChild(row);
+    rowNodes.push(row);
+  }
+
+  // ============================================================
+  // RENDER LOOP — topographic contour field
+  // For each grid cell:
+  //   1. Compute the scalar field value at (x, y, now)
+  //   2. Find the distance to the nearest target contour value
+  //   3. If within CONTOUR_BAND, render a Georgia char with alpha based on
+  //      (1 - distance/band) — closest to contour = brightest, edges fade
+  //   4. Otherwise emit a white space
+  // ============================================================
+  const numContours = CONTOUR_VALUES.length;
+
+  function render(now: number): void {
+    for (let row = 0; row < ROWS; row++) {
+      let html = "";
+      const ny = row / ROWS;
+      for (let col = 0; col < COLS; col++) {
+        const nx = col / COLS;
+        const fv = scalarField(nx, ny, now);
+
+        // Find distance to the closest contour
+        let bestDist = Infinity;
+        for (let k = 0; k < numContours; k++) {
+          const d = Math.abs(fv - CONTOUR_VALUES[k]!);
+          if (d < bestDist) bestDist = d;
+        }
+
+        if (bestDist < CONTOUR_BAND) {
+          // Soft alpha falloff: 1 at the contour center, 0 at the band edge.
+          // Squared so the lines have a soft hump rather than linear edges.
+          const t = 1 - bestDist / CONTOUR_BAND;
+          const alpha = t * t;
+          const byte = Math.min(255, (alpha * 255) | 0);
+          html += brightnessLookup[byte]!;
+        } else {
+          html += " ";
+        }
+      }
+      rowNodes[row]!.innerHTML = html;
+    }
+
+    requestAnimationFrame(render);
+  }
+
+  requestAnimationFrame(render);
+  } // end runAsciiHero
+</script>
