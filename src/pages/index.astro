@@ -4,21 +4,25 @@ import "../styles/global.css";
 import { Image } from "astro:assets";
 import ParallaxPortrait from "../components/ParallaxPortrait.astro";
 import FeaturedProject from "../components/FeaturedProject.astro";
-import ProjectCarousel from "../components/ProjectCarousel.astro";
-import ProjectCarouselCard from "../components/ProjectCarouselCard.astro";
 
-import mystoryImg from "../assets/work/mystory/preview.png";
-import mystoryLogo from "../assets/work/mystory/logo.svg";
 import envoyImg from "../assets/work/envoy/preview.png";
 import envoyLogo from "../assets/work/envoy/logo.svg";
 import osisImg from "../assets/work/osis/preview.png";
 import osisLogo from "../assets/work/osis/logo.svg";
 import artDirectLogo from "../assets/work/art-direct/logo.svg";
+import rptImg from "../assets/work/rpt/preview.png";
+import rptLogo from "../assets/work/rpt/logo.svg";
+import mystoryLogo from "../assets/work/mystory/logo.svg";
+import mystoryImg from "../assets/work/mystory/preview.png";
 import initialcommitLogo from "../assets/work/initialcommit/logo.svg";
 import icHeroDhow from "../assets/work/initialcommit/hero-dhow.webp";
 import icHeroDunes from "../assets/work/initialcommit/hero-dunes.jpeg";
 import icHeroMangroves from "../assets/work/initialcommit/hero-mangroves.jpeg";
-import spectrLogo from "../assets/work/spectr/logo.svg";
+import onc9Logo from "../assets/work/onc9/logo.svg";
+
+// Open-source repos: static snapshot in src/data/oss-repos.json.
+// Refresh with: `gh api 'users/andresCamp/repos?type=owner&sort=updated&per_page=100' --jq '[.[] | select(.fork == false and .archived == false and .description != null and (.description | length) > 0) | select(.name as $n | ["TrueMeridianSolutions","ViaSana-Web","osis-app"] | index($n) | not) | {name, description, html_url, pushed_at}] | sort_by(.pushed_at) | reverse | .[0:20]' > src/data/oss-repos.json`
+import ossRepos from "../data/oss-repos.json";
 ---
 
 <Layout>
@@ -30,7 +34,12 @@ import spectrLogo from "../assets/work/spectr/logo.svg";
     <div class="relative h-full max-w-7xl mx-auto px-4">
       <!-- Portrait — absolute, bottom center, behind content -->
       <div class="absolute bottom-0 left-1/2 z-0 -mb-6" style="transform: translateX(calc(-50% + 28px))">
-        <ParallaxPortrait src="/portrait.png" depthSrc="/depthmask.png" alt="Andrés Campos" />
+        <ParallaxPortrait
+          src="/portrait.png"
+          depthSrc="/depthmask.png"
+          alt="Andrés Campos"
+          pauseObserve="#hero-spacer"
+        />
       </div>
 
       <!-- Content overlay -->
@@ -41,15 +50,34 @@ import spectrLogo from "../assets/work/spectr/logo.svg";
           <h1 class="text-3xl md:text-5xl font-bold tracking-tight leading-[1.1]">
             Andrés Campos
           </h1>
-          <p class="mt-2 text-base md:text-lg text-neutral-600">Senior Product Engineer</p>
-          <p class="mt-3 text-sm text-neutral-500 max-w-md leading-relaxed">
-            I ship production AI systems end-to-end. Seven products across seven domains in 14 months — from voice AI to embassy intelligence to bilingual marketing.
+
+          <p class="mt-4 max-w-md text-base md:text-lg leading-relaxed text-neutral-600">
+            Full stack product engineer. I ship AI products and features end to end, from spec to design to infrastructure.
           </p>
 
-          <div class="mt-5 flex flex-wrap gap-3">
-            <a href="mailto:andres@onc9.com" class="px-5 py-2.5 bg-neutral-900 text-white rounded-full text-sm font-medium hover:bg-neutral-800 transition-colors">Get in touch</a>
+          <div class="mt-5 flex flex-wrap items-center gap-3">
             <a href="https://www.linkedin.com/in/andres-l-campos/" target="_blank" rel="noopener noreferrer" class="px-5 py-2.5 border border-neutral-300 rounded-full text-sm font-medium text-neutral-600 hover:border-neutral-400 transition-colors">LinkedIn</a>
-            <a href="/resume.pdf" class="px-5 py-2.5 text-sm text-neutral-500 hover:text-neutral-700 transition-colors">Resume ↓</a>
+            <a
+              href="https://github.com/andresCamp"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="GitHub @andresCamp"
+              class="inline-flex items-center gap-1.5 px-2 text-neutral-600 hover:text-neutral-900 transition-colors"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-github h-5 w-5" aria-hidden="true">
+                <path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"/>
+                <path d="M9 18c-4.51 2-5-2-7-2"/>
+              </svg>
+              <span class="text-sm font-medium">andresCamp</span>
+            </a>
+            <a
+              href="/resume"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="inline-flex items-center text-sm font-medium text-neutral-600 hover:text-neutral-900 transition-colors"
+            >
+              Resume ↓
+            </a>
           </div>
 
           <div class="mt-5 inline-block">
@@ -69,34 +97,16 @@ import spectrLogo from "../assets/work/spectr/logo.svg";
           </div>
         </div>
 
-        <!-- Right: Stats — large numbers, high signal, bottom-anchored -->
-        <div class="hidden lg:flex flex-col gap-5 self-end pb-16 lg:pb-24 w-72">
-          {[
-            { value: "7", unit: "products", detail: "shipped solo across 7 domains", fill: 100 },
-            { value: "5", unit: "LLM providers", detail: "in production — not tutorials", fill: 83 },
-            { value: "14", unit: "months", detail: "to ship all of it", fill: 92 },
-            { value: "20+", unit: "contributors", detail: "led across teams", fill: 70 },
-          ].map((stat) => (
-            <div>
-              <div class="flex items-baseline gap-2">
-                <span class="text-4xl font-bold tracking-tight text-neutral-900 leading-none">{stat.value}</span>
-                <span class="text-sm font-medium text-neutral-600">{stat.unit}</span>
-              </div>
-              <p class="text-[11px] text-neutral-400 font-mono mt-1">{stat.detail}</p>
-              <div class="h-1 w-full bg-neutral-200 rounded-full overflow-hidden mt-2">
-                <div class="h-full bg-neutral-900 rounded-full" style={`width: ${stat.fill}%`}></div>
-              </div>
-            </div>
-          ))}
-        </div>
-
       </div>
     </div>
     </div>
   </section>
 
-  <!-- Spacer: pushes scrollable content below the fixed hero -->
-  <div class="h-dvh"></div>
+  <!-- Spacer: pushes scrollable content below the fixed hero. The hero's
+       ParallaxPortrait observes this element via IntersectionObserver and
+       pauses its WebGL render loop once this spacer leaves the viewport
+       (i.e., the visitor has scrolled past the hero). Re-enters → resumes. -->
+  <div id="hero-spacer" class="h-dvh"></div>
 
   <!-- Scrollable content — rises over the fixed hero -->
   <div id="scroll-content" class="relative z-10 bg-white -mt-px rounded-t-[3.5rem] [filter:drop-shadow(0_-6px_12px_rgba(0,0,0,0.12))]">
@@ -108,88 +118,13 @@ import spectrLogo from "../assets/work/spectr/logo.svg";
     <div class="max-w-7xl mx-auto">
 
       <FeaturedProject
-        title="MyStory"
-        category="AI Platform"
-        titleFont="'Caudex', serif"
-        description="AI life story platform. Voice interviews become structured biographical content via a custom knowledge graph and five LLM providers behind a real-time agent layer."
-        backstory="Built so a grandchild who never met their grandfather can hear his voice tell his life story. The hard problem wasn't the model — it was making the conversation feel human enough that people forgot they were being interviewed."
-        href="https://mystory.bio"
-        links={[
-          { label: "mystory.bio", href: "https://mystory.bio", variant: "primary" },
-          { label: "Case study", href: "#", variant: "secondary" },
-        ]}
-        preview={mystoryImg}
-        logo={mystoryLogo}
-        techStack={["Next.js", "Ably", "Inngest", "Neo4j", "Mux", "Stripe", "Anthropic", "OpenAI", "Gemini"]}
-        stats={[
-          { value: "192K", label: "lines" },
-          { value: "5", label: "LLMs" },
-          { value: "TODO", label: "users" },
-          { value: "TODO", label: "weeks" },
-        ]}
-        languages={[
-          { name: "TypeScript", pct: 78 },
-          { name: "Python", pct: 14 },
-          { name: "Shell", pct: 5 },
-          { name: "SQL", pct: 3 },
-        ]}
-        imagePosition="left"
-        diagramLabel="Distributed Systems"
-        diagram={`
-  ┌─────────┐    ┌──────────┐    ┌─────────┐
-  │ Next.js │───▶│   Ably   │───▶│  Mux    │
-  │ App     │    │ Realtime │    │ Video   │
-  └────┬────┘    └──────────┘    └─────────┘
-       │
-  ┌────▼────┐    ┌──────────┐    ┌─────────┐
-  │  Neon   │    │  Neo4j   │    │   R2    │
-  │ Postgres│    │  Graph   │    │ Images  │
-  └─────────┘    └──────────┘    └─────────┘
-       │              │
-  ┌────▼──────────────▼────┐     ┌─────────┐
-  │     Fly.io Workers     │────▶│ Stripe  │
-  │  Agents · Pipelines    │     │ Billing │
-  └────────────────────────┘     └─────────┘`}
-      />
-
-      <FeaturedProject
-        title="DeepMesh"
-        category="AI Research · 4th Place Hackathon"
-        description="WhatsApp-native research marketplace. Built in 48 hours at a hackathon. Conversational research interface where the user never leaves WhatsApp."
-        href="https://deepmesh.io"
-        video="https://cdn.serdna.dev/deepmesh.mp4"
-        techStack={["Next.js", "Twilio", "PydanticAI", "Neon"]}
-        imagePosition="right"
-        diagramLabel="System Flow"
-        diagram={`
-  User (WhatsApp)
-       │
-       ▼
-  ┌─────────┐    ┌────────────┐
-  │ Twilio  │───▶│ PydanticAI │
-  │ Webhook │    │ Agent      │
-  └─────────┘    └─────┬──────┘
-                       │
-                 ┌─────▼──────┐
-                 │    Neon     │
-                 │  Research   │
-                 │  Database   │
-                 └─────┬──────┘
-                       │
-                 ┌─────▼──────┐
-                 │  Response   │
-                 │  → WhatsApp │
-                 └────────────┘`}
-      />
-
-      <FeaturedProject
         title="Osis"
-        category="Open Source · Developer Tool"
-        description="Product management that lives in the codebase. Structured specs, digital twins, and product thinking — directly alongside the code. Built because the workflow didn't exist."
-        href="https://github.com/andresCamp/osis-skill"
+        category="Developer Tool"
+        description="Built to keep product context alive between coding agent sessions. The skill is the engine; desktop and web app are the interaction surfaces. Product clarity at the scale of managing multiple products to PMF."
+        href="https://osis.dev"
         preview={osisImg}
         logo={osisLogo}
-        techStack={["Markdown", "Next.js", "Anthropic"]}
+        techStack={["Markdown", "Astro", "Hono", "Drizzle", "Tauri", "Solid", "TanStack Start"]}
         imagePosition="left"
         diagramLabel="Protocol Hierarchy"
         diagram={`
@@ -209,10 +144,35 @@ import spectrLogo from "../assets/work/spectr/logo.svg";
       />
 
       <FeaturedProject
+        title="Art Direct"
+        category="Creative Tool"
+        description="Art direction tool, built in a day with AI tooling. Launched on Reddit; telemetry on the first 40 sessions showed nobody making it past the landing page to the studio. Iterated the funnel until activation went from zero to actual."
+        href="https://artdirect.dev"
+        video="https://cdn.serdna.dev/art-direct.mov"
+        logo={artDirectLogo}
+        techStack={["Astro", "Svelte"]}
+        imagePosition="right"
+        videoScale={1.02}
+      />
+
+      <FeaturedProject
+        title="Rotating Power Technologies"
+        category="Marketing Site"
+        description="Marketing site for a turbine engineering consultancy entering the GCC market against global incumbents. Started with a 90-minute recorded conversation with the founder; the transcript became the spec. Bilingual EN/AR with regional content variants, privacy-first geo detection, Lighthouse 100."
+        href="https://onc9.com/work/rpt"
+        video="https://cdn.serdna.dev/rpt.mov"
+        logo={rptLogo}
+        techStack={["Astro", "React", "i18n"]}
+        imagePosition="left"
+        logoPosition="top-left"
+        gradientStrength="subtle"
+      />
+
+      <FeaturedProject
         title="Envoy"
         category="Enterprise SaaS"
-        description="Sovereign AI for diplomatic communications. Embassy inbox intelligence with per-country data isolation. Built for a problem most people don't know exists."
-        href="https://envoy.cd"
+        description="Embassy inbox intelligence for diplomatic communications. Started with three hours of recorded conversations with an ambassador and the admin coordinator who'd built a 13-column spreadsheet workaround; transcripts became the spec. Multi-tenant SaaS with per-country data sovereignty enforced architecturally; 98% classification accuracy across 100+ edge case permutations."
+        href="https://onc9.com/work/envoy"
         preview={envoyImg}
         logo={envoyLogo}
         techStack={["Next.js", "Inngest", "NestJS", "Neon", "Anthropic"]}
@@ -239,106 +199,210 @@ import spectrLogo from "../assets/work/spectr/logo.svg";
        Anthropic LLM`}
       />
 
+      <FeaturedProject
+        title="DeepMesh"
+        category="Market Research"
+        description="Research marketplace running entirely inside WhatsApp threads. Conversational agent handles requests, fulfillment, and delivery without a separate app surface. Won 'Most VC-Backable' at the Transpose c0mpiled hackathon in Abu Dhabi."
+        href="https://deepmesh.io"
+        video="https://cdn.serdna.dev/deepmesh.mp4"
+        techStack={["Next.js", "Twilio", "PydanticAI", "Neon"]}
+        imagePosition="left"
+        diagramLabel="System Flow"
+        diagram={`
+  User (WhatsApp)
+       │
+       ▼
+  ┌─────────┐    ┌────────────┐
+  │ Twilio  │───▶│ PydanticAI │
+  │ Webhook │    │ Agent      │
+  └─────────┘    └─────┬──────┘
+                       │
+                 ┌─────▼──────┐
+                 │    Neon     │
+                 │  Research   │
+                 │  Database   │
+                 └─────┬──────┘
+                       │
+                 ┌─────▼──────┐
+                 │  Response   │
+                 │  → WhatsApp │
+                 └────────────┘`}
+      />
+
     </div>
   </section>
 
   <!-- ============================================ -->
-  <!-- SECTION 3: MORE WORK (Carousel)              -->
+  <!-- SECTION 2b: HORIZONTAL STRIP (more work)     -->
+  <!-- Full-bleed image cards. Tech stack visible   -->
+  <!-- by default; description swaps in on hover.   -->
   <!-- ============================================ -->
-  <section class="py-16 px-4 md:px-8">
-    <div class="max-w-7xl mx-auto">
-      <h2 class="text-lg font-semibold text-neutral-900 mb-6">More work</h2>
-      <ProjectCarousel>
-        <ProjectCarouselCard
-          title="Art Direct"
-          description="AI art direction tool. Concept to production in one day."
-          href="#"
-          logo={artDirectLogo}
-        >
-          <div class="absolute inset-0" style="background: linear-gradient(135deg, #1a1a2e 0%, #16213e 40%, #533483 100%)"></div>
-          <div class="absolute inset-0 flex items-center justify-center z-10 pointer-events-none">
-            <span class="text-white text-5xl md:text-6xl italic tracking-tight drop-shadow-lg" style="font-family: 'Instrument Serif', serif;">Art Direct</span>
-          </div>
-        </ProjectCarouselCard>
+  <section class="py-8 px-4 md:px-8">
+    <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6">
 
-        <ProjectCarouselCard
-          title="InitialCommit"
-          description="Abu Dhabi's builder community. Events, brand, platform. 20 members, 100% repeat attendance."
-          href="https://initialcommit.ae"
-          logo={initialcommitLogo}
-        >
-          <div class="ic-cycle absolute inset-0">
-            <Image src={icHeroDhow} alt="InitialCommit — Dhow" class="absolute inset-0 h-full w-full object-cover opacity-100 transition-opacity duration-[1800ms] ease-[cubic-bezier(0.4,0,0.2,1)]" />
-            <Image src={icHeroDunes} alt="InitialCommit — Dunes" class="absolute inset-0 h-full w-full object-cover opacity-0 transition-opacity duration-[1800ms] ease-[cubic-bezier(0.4,0,0.2,1)]" />
-            <Image src={icHeroMangroves} alt="InitialCommit — Mangroves" class="absolute inset-0 h-full w-full object-cover opacity-0 transition-opacity duration-[1800ms] ease-[cubic-bezier(0.4,0,0.2,1)]" />
+      <!-- MyStory -->
+      <a
+        href="https://mystory.bio"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="strip-card group block relative aspect-[4/3] rounded-2xl overflow-hidden bg-neutral-100"
+      >
+        <Image src={mystoryImg} alt="MyStory" class="absolute inset-0 w-full h-full object-cover" />
+        <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent"></div>
+        <div class="absolute inset-0 flex items-center justify-center z-10 pointer-events-none">
+          <Image src={mystoryLogo} alt="MyStory logo" class="w-20 h-20 md:w-24 md:h-24 object-contain drop-shadow-lg" />
+        </div>
+        <div class="strip-stack absolute bottom-0 left-0 right-0 z-10 px-4 pb-4 transition-opacity duration-300 group-hover:opacity-0">
+          <div class="grid grid-cols-4 gap-2">
+            <div class="inline-flex items-center justify-center h-7 bg-white/15 backdrop-blur-sm rounded-full"><img src="/tech/nextjs-wordmark.svg" alt="Next.js" class="tech-icon max-h-4 max-w-[60px] w-auto h-auto object-contain" /></div>
+            <div class="inline-flex items-center justify-center h-7 bg-white/15 backdrop-blur-sm rounded-full"><img src="/tech/livekit-wordmark.svg" alt="LiveKit" class="tech-icon max-h-4 max-w-[72px] w-auto h-auto object-contain" /></div>
+            <div class="inline-flex items-center justify-center h-7 bg-white/15 backdrop-blur-sm rounded-full"><img src="/tech/neo4j-lockup.svg" alt="Neo4j" class="tech-icon max-h-4 max-w-[72px] w-auto h-auto object-contain" /></div>
+            <div class="inline-flex items-center justify-center h-7 bg-white/15 backdrop-blur-sm rounded-full"><img src="/tech/ably-lockup.svg" alt="Ably" class="tech-icon max-h-4 max-w-[72px] w-auto h-auto object-contain" /></div>
+            <div class="inline-flex items-center justify-center h-7 bg-white/15 backdrop-blur-sm rounded-full"><img src="/tech/mux-wordmark.svg" alt="Mux" class="tech-icon max-h-4 max-w-[44px] w-auto h-auto object-contain" /></div>
+            <div class="inline-flex items-center justify-center h-7 bg-white/15 backdrop-blur-sm rounded-full"><img src="/tech/stripe-wordmark.svg" alt="Stripe" class="tech-icon max-h-4 max-w-[72px] w-auto h-auto object-contain" /></div>
+            <div class="inline-flex items-center justify-center h-7 bg-white/15 backdrop-blur-sm rounded-full"><img src="/tech/anthropic-wordmark.svg" alt="Anthropic" class="tech-icon max-h-4 max-w-[72px] w-auto h-auto object-contain" /></div>
+            <div class="inline-flex items-center justify-center h-7 bg-white/15 backdrop-blur-sm rounded-full"><img src="/tech/openai-wordmark.svg" alt="OpenAI" class="tech-icon max-h-4 max-w-[52px] w-auto h-auto object-contain" /></div>
           </div>
-          <div class="absolute inset-0 bg-gradient-to-tr from-[#09090B]/75 via-[#09090B]/50 to-transparent"></div>
-          <div class="absolute inset-0 bg-gradient-to-t from-[#09090B]/65 via-[#09090B]/10 to-transparent"></div>
-          <div class="absolute inset-0 flex items-center justify-center z-10 pointer-events-none">
-            <div class="flex items-center gap-2">
-              <span class="w-4 h-4 rounded-full bg-[#22E58B]"></span>
-              <span class="text-white text-lg font-medium tracking-tight drop-shadow-lg" style="font-family: 'JetBrains Mono', monospace;">initialcommit</span>
-            </div>
-          </div>
-        </ProjectCarouselCard>
+        </div>
+        <div class="strip-desc absolute bottom-0 left-0 right-0 z-10 px-5 pb-5 opacity-0 transition-opacity duration-300 group-hover:opacity-100 pointer-events-none">
+          <p class="text-sm text-white/95 leading-snug">AI life-story platform. Voice agents conduct documentary-style interviews; a biographer agent synthesizes across sessions. 192K LOC, five LLM providers.</p>
+        </div>
+      </a>
 
-        <ProjectCarouselCard
-          title="Spectr"
-          description="High polish macOS markdown reader for spec driven development"
-          href="https://github.com/andresCamp/spectr"
-          logo={spectrLogo}
-        >
-          <div
-            class="absolute inset-0"
-            style="background: radial-gradient(ellipse at 25% 25%, rgba(255,253,225,0.9) 0%, transparent 55%), radial-gradient(ellipse at 80% 75%, rgba(200,175,80,0.30) 0%, transparent 55%), radial-gradient(ellipse at 60% 15%, rgba(235,215,130,0.30) 0%, transparent 50%), radial-gradient(ellipse at 15% 85%, rgba(190,165,70,0.25) 0%, transparent 55%), #FBF3B5;"
-          ></div>
-          <div class="absolute inset-0 flex flex-col items-center justify-center z-10 pointer-events-none">
-            <Image src={spectrLogo} alt="Spectr" class="w-24 h-24 md:w-28 md:h-28 object-contain" style="filter: brightness(0);" />
-            <span class="mt-3 text-base md:text-lg font-semibold text-black" style="font-family: 'SF Compact Text', 'SF Compact', -apple-system, system-ui, sans-serif;">Spectr</span>
+      <!-- InitialCommit (image carousel) -->
+      <a
+        href="https://initialcommit.ae"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="strip-card group block relative aspect-[4/3] rounded-2xl overflow-hidden bg-neutral-900"
+      >
+        <div class="ic-cycle absolute inset-0">
+          <Image src={icHeroDhow} alt="InitialCommit — dhow" class="absolute inset-0 w-full h-full object-cover opacity-100 transition-opacity duration-1000" />
+          <Image src={icHeroDunes} alt="InitialCommit — dunes" class="absolute inset-0 w-full h-full object-cover opacity-0 transition-opacity duration-1000" />
+          <Image src={icHeroMangroves} alt="InitialCommit — mangroves" class="absolute inset-0 w-full h-full object-cover opacity-0 transition-opacity duration-1000" />
+        </div>
+        <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent"></div>
+        <div class="absolute inset-0 flex items-center justify-center z-10 pointer-events-none">
+          <Image src={initialcommitLogo} alt="InitialCommit logo" class="w-64 h-64 md:w-80 md:h-80 object-contain drop-shadow-lg translate-x-[20%]" />
+        </div>
+        <div class="strip-stack absolute bottom-0 left-0 right-0 z-10 px-4 pb-4 transition-opacity duration-300 group-hover:opacity-0">
+          <div class="flex flex-wrap items-center gap-2">
+            <div class="inline-flex items-center justify-center h-7 w-24 bg-white/15 backdrop-blur-sm rounded-full"><img src="/tech/nextjs-wordmark.svg" alt="Next.js" class="tech-icon max-h-4 max-w-[60px] w-auto h-auto object-contain" /></div>
+            <div class="inline-flex items-center justify-center h-7 w-24 bg-white/15 backdrop-blur-sm rounded-full"><img src="/tech/prisma-lockup.svg" alt="Prisma" class="tech-icon max-h-4 max-w-[72px] w-auto h-auto object-contain" /></div>
           </div>
-        </ProjectCarouselCard>
-      </ProjectCarousel>
+        </div>
+        <div class="strip-desc absolute bottom-0 left-0 right-0 z-10 px-5 pb-5 opacity-0 transition-opacity duration-300 group-hover:opacity-100 pointer-events-none">
+          <p class="text-sm text-white/95 leading-snug">Abu Dhabi builder community. Events, brand identity, and a platform built from scratch for the AI engineer scene in the UAE.</p>
+        </div>
+      </a>
+
+      <!-- ONC9 -->
+      <a
+        href="https://onc9.com"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="strip-card-light group block relative aspect-[4/3] rounded-2xl overflow-hidden bg-white"
+      >
+        <div class="absolute inset-0 flex items-center justify-center z-10 pointer-events-none">
+          <Image src={onc9Logo} alt="ONC9 logo" class="w-32 h-32 md:w-40 md:h-40 object-contain" />
+        </div>
+        <div class="strip-stack absolute bottom-0 left-0 right-0 z-10 px-4 pb-4 transition-opacity duration-300 group-hover:opacity-0">
+          <div class="flex flex-wrap items-center gap-2">
+            <div class="inline-flex items-center justify-center h-7 w-32 bg-neutral-900 rounded-full"><img src="/tech/tanstack-lockup.svg" alt="TanStack Start" class="tech-icon max-h-4 max-w-[100px] w-auto h-auto object-contain" /></div>
+            <div class="inline-flex items-center justify-center h-7 w-24 bg-neutral-900 rounded-full"><img src="/tech/solid-lockup.svg" alt="Solid" class="tech-icon max-h-4 max-w-[72px] w-auto h-auto object-contain" /></div>
+            <div class="inline-flex items-center justify-center h-7 w-24 bg-neutral-900 rounded-full"><img src="/tech/drizzle-lockup.svg" alt="Drizzle" class="tech-icon max-h-4 max-w-[72px] w-auto h-auto object-contain" /></div>
+          </div>
+        </div>
+        <div class="strip-desc absolute bottom-0 left-0 right-0 z-10 px-5 pb-5 opacity-0 transition-opacity duration-300 group-hover:opacity-100 pointer-events-none">
+          <p class="text-sm text-neutral-700 leading-snug">AI-native operations studio. Bespoke automation builds and a hosted operating layer for industrial firms.</p>
+        </div>
+      </a>
+
     </div>
+
+    <style>
+      /* Force tech icons to monochrome white inside both the dark-bg
+         strip cards (.strip-card) and the inverse-pill light card
+         (.strip-card-light), since both render icons on a dark pill. */
+      .strip-card .tech-icon,
+      .strip-card-light .tech-icon {
+        filter: brightness(0) invert(1);
+      }
+    </style>
   </section>
 
   <!-- ============================================ -->
-  <!-- SECTION 4: CONTACT                           -->
+  <!-- SECTION 3: OPEN SOURCE                       -->
   <!-- ============================================ -->
-  <section id="contact" class="py-16 px-8">
-    <div class="max-w-md">
-      <h2 class="text-2xl md:text-3xl font-bold text-neutral-900">
-        Let's build something.
-      </h2>
-      <p class="mt-3 text-sm text-neutral-500 leading-relaxed">
-        Available for contract work and full-time remote roles.<br/>
-        Based in Abu Dhabi (UTC+4). I respond within 24 hours.
-      </p>
+  {ossRepos.length > 0 && (
+    <section class="py-16 px-4 md:px-8">
+      <div class="max-w-3xl mx-auto">
+        <div class="flex items-center gap-4 mb-8">
+          <h2 class="text-2xl font-semibold text-neutral-900">Open source</h2>
+          <a
+            href="https://github.com/andresCamp"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="GitHub @andresCamp"
+            class="inline-flex items-center gap-2 text-neutral-500 hover:text-neutral-900 transition-colors"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-github h-6 w-6" aria-hidden="true">
+              <path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"/>
+              <path d="M9 18c-4.51 2-5-2-7-2"/>
+            </svg>
+            <span class="text-base">andresCamp</span>
+          </a>
+        </div>
+        <ul class="space-y-3 pl-1">
+          {ossRepos.map((repo) => (
+            <li class="text-sm leading-relaxed">
+              <a
+                href={repo.html_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                class="group block"
+              ><span class="text-neutral-900 font-medium group-hover:underline">{repo.name}</span><span class="text-neutral-500"> — {repo.description}</span></a>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
+  )}
 
-      <div class="mt-6 flex flex-wrap gap-3">
+  <!-- ============================================ -->
+  <!-- SECTION 4: ABOUT + CTA (formerly Contact)    -->
+  <!-- ============================================ -->
+  <section id="contact" class="py-24 px-4 md:px-8">
+    <div class="max-w-3xl mx-auto flex flex-col md:flex-row items-center gap-10 md:gap-14">
+
+      <!-- Left column: mini parallax portrait, cropped to a circle -->
+      <div class="shrink-0 w-48 h-48 md:w-56 md:h-56 rounded-full overflow-hidden bg-white relative">
+        <div class="absolute bottom-0 left-1/2 -translate-x-1/2">
+          <ParallaxPortrait
+            src="/portrait.png"
+            depthSrc="/depthmask.png"
+            alt="Andrés Campos"
+            style="width: 200px; height: 237px;"
+          />
+        </div>
+      </div>
+
+      <!-- Right column: friendly CTA + email -->
+      <div class="flex flex-col items-start gap-4">
+        <p class="text-xl md:text-2xl font-semibold text-neutral-900 leading-tight">
+          Drop me a line.
+        </p>
+        <p class="text-sm text-neutral-500 max-w-sm">
+          I read everything that lands in my inbox.
+        </p>
         <a
           href="mailto:andres@onc9.com"
-          class="inline-flex items-center px-5 py-2.5 bg-neutral-900 text-white rounded-full text-sm font-medium hover:bg-neutral-800 transition-colors"
+          class="mt-2 inline-flex items-center px-5 py-2.5 bg-neutral-900 text-white rounded-full text-sm font-medium hover:bg-neutral-800 transition-colors"
         >
           andres@onc9.com
         </a>
-        <a
-          href="https://calendly.com/andres-onc9/30min"
-          target="_blank"
-          rel="noopener noreferrer"
-          class="inline-flex items-center px-5 py-2.5 border border-neutral-300 rounded-full text-sm font-medium text-neutral-600 hover:border-neutral-400 transition-colors"
-        >
-          Book a 30-min call
-        </a>
       </div>
 
-      <div class="flex gap-4 mt-4">
-        <a href="https://www.linkedin.com/in/andres-l-campos/" target="_blank" rel="noopener noreferrer" class="text-xs text-neutral-500 hover:text-neutral-900 transition-colors">
-          LinkedIn
-        </a>
-        <a href="https://github.com/andresCamp" target="_blank" rel="noopener noreferrer" class="text-xs text-neutral-500 hover:text-neutral-900 transition-colors">
-          GitHub
-        </a>
-      </div>
     </div>
   </section>
 

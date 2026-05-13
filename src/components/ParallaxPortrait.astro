@@ -4,16 +4,20 @@ interface Props {
   depthSrc: string;
   alt?: string;
   class?: string;
+  style?: string;
+  /** CSS selector for an element to observe. When that element leaves the viewport, the render loop pauses; resumes when it re-enters. */
+  pauseObserve?: string;
 }
 
-const { src, depthSrc, alt = "Portrait", class: className = "" } = Astro.props;
+const { src, depthSrc, alt = "Portrait", class: className = "", style = "", pauseObserve } = Astro.props;
 ---
 
-<div class:list={["parallax-portrait-wrapper", className]}>
+<div class:list={["parallax-portrait-wrapper", className]} style={style}>
   <canvas
     data-parallax-canvas
     data-portrait={src}
     data-depth={depthSrc}
+    data-pause-observe={pauseObserve}
     aria-label={alt}
     role="img"
   ></canvas>
@@ -248,6 +252,12 @@ const { src, depthSrc, alt = "Portrait", class: className = "" } = Astro.props;
     let currentY = 0;
     // Displacement + smoothing (tuned via top-level constants)
 
+    // Pause-on-scroll state: when an observed element exits the viewport, the
+    // RAF loop short-circuits and the canvas stops consuming GPU. WebGL context
+    // and textures remain resident so resume is instant.
+    let isVisible = true;
+    let rafId: number | null = null;
+
     function syncShadow() {
       if (!wrapper) return;
 
@@ -268,6 +278,10 @@ const { src, depthSrc, alt = "Portrait", class: className = "" } = Astro.props;
 
 
     function render() {
+      if (!isVisible) {
+        rafId = null;
+        return;
+      }
       currentX += (targetX - currentX) * LERP_SPEED;
       currentY += (targetY - currentY) * LERP_SPEED;
       syncShadow();
@@ -279,7 +293,7 @@ const { src, depthSrc, alt = "Portrait", class: className = "" } = Astro.props;
       gl.uniform1f(uIntensity, INTENSITY);
 
       gl.drawArrays(gl.TRIANGLES, 0, 6);
-      requestAnimationFrame(render);
+      rafId = requestAnimationFrame(render);
     }
 
     // Entire viewport drives the parallax
@@ -304,8 +318,32 @@ const { src, depthSrc, alt = "Portrait", class: className = "" } = Astro.props;
     });
     ro.observe(canvas);
 
+    // IntersectionObserver-based RAF pause. Only applied when the canvas
+    // declares a `data-pause-observe` selector. The observer targets a
+    // DOM-flow element (not the fixed hero itself), because IO on fixed
+    // elements treats them as always intersecting.
+    const pauseSelector = canvas.dataset.pauseObserve;
+    if (pauseSelector) {
+      const observeTarget = document.querySelector(pauseSelector);
+      if (observeTarget) {
+        const observer = new IntersectionObserver(
+          (entries) => {
+            for (const entry of entries) {
+              const wasVisible = isVisible;
+              isVisible = entry.isIntersecting;
+              if (isVisible && !wasVisible && rafId === null) {
+                rafId = requestAnimationFrame(render);
+              }
+            }
+          },
+          { threshold: 0 }
+        );
+        observer.observe(observeTarget);
+      }
+    }
+
     syncShadow();
-    render();
+    rafId = requestAnimationFrame(render);
   }
 
   function initAll() {

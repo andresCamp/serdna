@@ -5,7 +5,7 @@
   "activeVersion": "v3",
   "anonId": "b6231db3-f271-4623-b420-0dc3e1364733",
   "createdAt": "2026-04-07T00:00:00Z",
-  "lastTwinUpdate": "2026-04-04",
+  "lastTwinUpdate": "2026-05-12",
   "files": {
     "twin": "osis/twin.md",
     "sessions": "osis/sessions.md",
@@ -25,7 +25,11 @@
     "v3": {
       "changelog": "osis/v3/changelog.md",
       "systems": {
-        "core": {}
+        "core": {
+          "iteration-1--signal-not-pander": {
+            "brief": "osis/v3/core/iteration-1--signal-not-pander/brief.md"
+          }
+        }
       }
     }
   },

@@ -35,6 +35,12 @@ interface Props {
   diagram?: string;
   diagramLabel?: string;
   imagePosition?: 'left' | 'right';
+  /** Where the logo sits inside the image area. */
+  logoPosition?: 'center' | 'top-left';
+  /** Darkness of the bottom-up gradient overlay. */
+  gradientStrength?: 'normal' | 'subtle';
+  /** Scale factor applied to the video element (1 = native, 1.1 = 10% zoom). */
+  videoScale?: number;
   class?: string;
 }
 
@@ -83,6 +89,14 @@ const TECH_ICONS: Record<string, string> = {
   "NestJS": "/tech/nestjs-lockup.svg",
   "Hono": "/tech/hono-lockup.png",
   "Markdown": "/tech/markdown.svg",
+  "Astro": "/tech/astro-lockup.svg",
+  "Svelte": "/tech/svelte-lockup.svg",
+  "React": "/tech/react-lockup.svg",
+  "Prisma": "/tech/prisma-lockup.svg",
+  "TanStack Start": "/tech/tanstack-lockup.svg",
+  "Tauri": "/tech/tauri-lockup.svg",
+  "Solid": "/tech/solid-lockup.svg",
+  "Drizzle": "/tech/drizzle-lockup.svg",
 };
 
 // Per-icon max-width overrides in pixels. Use when a logo's natural
@@ -112,6 +126,9 @@ const {
   diagram,
   diagramLabel,
   imagePosition = 'left',
+  logoPosition = 'center',
+  gradientStrength = 'normal',
+  videoScale = 1,
   class: className = '',
 } = Astro.props;
 
@@ -125,13 +142,24 @@ const resolvedLinks: Link[] =
 <div class:list={['grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 items-center py-16 lg:py-24', className]}>
   <!-- Image side -->
   <div class:list={[
-    'featured-image group/img relative aspect-[4/3] rounded-2xl overflow-hidden bg-neutral-100 cursor-pointer',
+    'featured-image group/img relative aspect-[4/3] rounded-3xl overflow-hidden bg-neutral-100',
+    diagram ? 'cursor-pointer' : '',
     imagePosition === 'right' ? 'lg:order-2' : '',
   ]}>
     <!-- Product image/video layer -->
-    <div class="absolute inset-0 transition-opacity duration-500 group-hover/img:opacity-0">
+    <div class:list={[
+      'absolute inset-0',
+      diagram ? 'transition-opacity duration-500 group-hover/img:opacity-0' : '',
+    ]}>
       {video ? (
-        <video autoplay muted loop playsinline class="absolute inset-0 w-full h-full object-cover">
+        <video
+          autoplay
+          muted
+          loop
+          playsinline
+          class="absolute inset-0 w-full h-full object-cover"
+          style={videoScale !== 1 ? `transform: scale(${videoScale}); transform-origin: center;` : undefined}
+        >
           <source src={video} type="video/mp4" />
         </video>
       ) : preview ? (
@@ -141,12 +169,31 @@ const resolvedLinks: Link[] =
       )}
 
       <!-- Gradient overlay for readability -->
-      <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent"></div>
+      <div class:list={[
+        'absolute inset-0',
+        gradientStrength === 'subtle'
+          ? 'bg-gradient-to-t from-black/30 to-transparent'
+          : 'bg-gradient-to-t from-black/60 via-black/20 to-transparent',
+      ]}></div>
 
-      <!-- Logo centered -->
+      <!-- Logo -->
       {logo && (
-        <div class="absolute inset-0 flex items-center justify-center z-10 pointer-events-none">
-          <Image src={logo} alt={`${title} logo`} class="w-24 h-24 md:w-32 md:h-32 object-contain drop-shadow-lg" />
+        <div class:list={[
+          'absolute inset-0 z-10 pointer-events-none flex',
+          logoPosition === 'top-left'
+            ? 'items-start justify-start p-6 md:p-8'
+            : 'items-center justify-center',
+        ]}>
+          <Image
+            src={logo}
+            alt={`${title} logo`}
+            class:list={[
+              'object-contain drop-shadow-lg',
+              logoPosition === 'top-left'
+                ? 'w-14 h-14 md:w-16 md:h-16'
+                : 'w-24 h-24 md:w-32 md:h-32',
+            ]}
+          />
         </div>
       )}
     </div>
@@ -163,7 +210,10 @@ const resolvedLinks: Link[] =
 
     <!-- Tech stack at bottom of image -->
     {techStack.length > 0 && (
-      <div class="absolute bottom-0 left-0 right-0 z-10 px-4 pb-4 transition-opacity duration-500 group-hover/img:opacity-0">
+      <div class:list={[
+        'absolute bottom-0 left-0 right-0 z-10 px-4 pb-4',
+        diagram ? 'transition-opacity duration-500 group-hover/img:opacity-0' : '',
+      ]}>
         <div class="flex flex-wrap items-center gap-2">
           {techStack.map((tech) => {
             const iconSrc = TECH_ICONS[tech];

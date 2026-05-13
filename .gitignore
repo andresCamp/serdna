@@ -27,3 +27,6 @@ pnpm-debug.log*
 
 # jetbrains setting folder
 .idea/
+
+# private professional-identity context (resume variants, market research, cover letters, positioning)
+docs/professional-identity/
