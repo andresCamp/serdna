@@ -4,6 +4,7 @@ import tailwindcss from "@tailwindcss/vite";
 import react from "@astrojs/react";
 
 export default defineConfig({
+  site: "https://serdna.dev",
   image: {
     service: { entrypoint: "astro/assets/services/noop" },
   },

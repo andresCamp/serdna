@@ -4,10 +4,24 @@ import { SlidingText } from "../components/SlidingText";
 
 interface Props {
   title?: string;
+  description?: string;
+  /** Path or absolute URL of the social preview image. Defaults to /og.jpg. */
+  image?: string;
+  /** Open Graph object type. */
+  type?: "website" | "profile" | "article";
 }
 
-const { title = "Andrés Campos" } =
-  Astro.props;
+const {
+  title = "Andrés Campos",
+  description = "Full stack product engineer. I ship AI products and features end to end, from spec to design to infrastructure.",
+  image = "/og.jpg",
+  type = "website",
+} = Astro.props;
+
+const canonicalUrl = new URL(Astro.url.pathname, Astro.site).toString();
+const imageUrl = image.startsWith("http")
+  ? image
+  : new URL(image, Astro.site).toString();
 ---
 
 <html lang="en">
@@ -33,10 +47,32 @@ const { title = "Andrés Campos" } =
 
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="generator" content={Astro.generator} />
+
+    <!-- SEO -->
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonicalUrl} />
+
+    <!-- Open Graph -->
+    <meta property="og:type" content={type} />
+    <meta property="og:site_name" content="Andrés Campos" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonicalUrl} />
+    <meta property="og:image" content={imageUrl} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Andrés Campos — Full stack product engineer" />
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={imageUrl} />
+
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Caudex:ital,wght@0,400;0,700;1,400;1,700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet" />
-    <title>{title}</title>
     <ClientRouter />
   </head>
   <body class="bg-white dark:bg-black text-neutral-900 antialiased [padding-top:env(safe-area-inset-top)] [padding-bottom:env(safe-area-inset-bottom)]">
