@@ -43,10 +43,11 @@ import ossRepos from "../data/oss-repos.json";
       </div>
 
       <!-- Content overlay -->
-      <div class="relative z-[1] flex flex-col lg:flex-row lg:justify-between h-full px-2 lg:px-8">
+      <div class="relative z-[1] flex flex-col justify-end lg:flex-row lg:justify-between h-full px-2 lg:px-8">
 
-        <!-- Left: Identity — bottom-anchored, compact -->
-        <div id="hero-text" class="self-end pb-16 lg:pb-24 origin-center">
+        <!-- Left: Identity — sits just above the portrait on mobile,
+             bottom-anchored beside the portrait on desktop. -->
+        <div id="hero-text" class="lg:self-end [padding-bottom:calc(50dvh+0.75rem)] lg:pb-24 origin-center">
           <h1 class="text-3xl md:text-5xl font-bold tracking-tight leading-[1.1]">
             Andrés Campos
           </h1>
@@ -56,13 +57,13 @@ import ossRepos from "../data/oss-repos.json";
           </p>
 
           <div class="mt-5 flex flex-wrap items-center gap-3">
-            <a href="https://www.linkedin.com/in/andres-l-campos/" target="_blank" rel="noopener noreferrer" class="px-5 py-2.5 border border-neutral-300 rounded-full text-sm font-medium text-neutral-600 hover:border-neutral-400 transition-colors">LinkedIn</a>
+            <a href="https://www.linkedin.com/in/andres-l-campos/" target="_blank" rel="noopener noreferrer" class="inline-flex items-center min-h-11 px-5 border border-neutral-300 rounded-full text-sm font-medium text-neutral-600 hover:border-neutral-400 transition-colors">LinkedIn</a>
             <a
               href="https://github.com/andresCamp"
               target="_blank"
               rel="noopener noreferrer"
               aria-label="GitHub @andresCamp"
-              class="inline-flex items-center gap-1.5 px-2 text-neutral-600 hover:text-neutral-900 transition-colors"
+              class="inline-flex items-center min-h-11 gap-1.5 px-2 text-neutral-600 hover:text-neutral-900 transition-colors"
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-github h-5 w-5" aria-hidden="true">
                 <path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"/>
@@ -74,22 +75,22 @@ import ossRepos from "../data/oss-repos.json";
               href="/resume"
               target="_blank"
               rel="noopener noreferrer"
-              class="inline-flex items-center text-sm font-medium text-neutral-600 hover:text-neutral-900 transition-colors"
+              class="inline-flex items-center min-h-11 px-2 text-sm font-medium text-neutral-600 hover:text-neutral-900 transition-colors"
             >
               Resume ↓
             </a>
           </div>
 
-          <div class="mt-5 inline-block">
-            <div class="citizen-row flex items-center">
+          <div class="mt-5 w-full lg:inline-block lg:w-auto">
+            <div class="citizen-row grid grid-cols-4 gap-3 py-2 lg:flex lg:flex-wrap lg:items-center lg:gap-y-3 lg:gap-x-0">
             {[
               { label: "US Citizen", img: "/us.png", color: "#002868" },
               { label: "Mexican Citizen", img: "/mx.png", color: "#006341" },
               { label: "German Citizen", img: "/de.png", color: "#000000" },
               { label: "UAE Golden Visa", img: "/ae.png", color: "#C8102E" },
             ].map((item) => (
-              <div class="citizen-item cursor-none transition-all duration-300 px-3" data-label={item.label} data-color={item.color}>
-                <img src={item.img} alt={item.label} class="w-[48px] h-[48px] object-contain pointer-events-none" />
+              <div class="citizen-item flex items-center justify-center cursor-none transition-all duration-300 lg:px-3" data-label={item.label} data-color={item.color}>
+                <img src={item.img} alt={item.label} class="w-full h-auto aspect-square object-contain pointer-events-none lg:w-[48px] lg:h-[48px] lg:aspect-auto" />
               </div>
             ))}
             </div>
@@ -252,8 +253,9 @@ import ossRepos from "../data/oss-repos.json";
         <div class="absolute inset-0 flex items-center justify-center z-10 pointer-events-none">
           <Image src={mystoryLogo} alt="MyStory logo" class="w-20 h-20 md:w-24 md:h-24 object-contain drop-shadow-lg" />
         </div>
-        <div class="strip-stack absolute bottom-0 left-0 right-0 z-10 px-4 pb-4 transition-opacity duration-300 group-hover:opacity-0">
-          <div class="grid grid-cols-4 gap-2">
+        <div class="strip-bottom absolute inset-x-0 bottom-0 z-10 p-4 flex flex-col gap-3">
+          <p class="strip-desc text-sm text-white/95 leading-snug">AI life-story platform. Voice agents conduct documentary-style interviews; a biographer agent synthesizes across sessions. 192K LOC, five LLM providers.</p>
+          <div class="strip-stack grid grid-cols-4 gap-2">
             <div class="inline-flex items-center justify-center h-7 bg-white/15 backdrop-blur-sm rounded-full"><img src="/tech/nextjs-wordmark.svg" alt="Next.js" class="tech-icon max-h-4 max-w-[60px] w-auto h-auto object-contain" /></div>
             <div class="inline-flex items-center justify-center h-7 bg-white/15 backdrop-blur-sm rounded-full"><img src="/tech/livekit-wordmark.svg" alt="LiveKit" class="tech-icon max-h-4 max-w-[72px] w-auto h-auto object-contain" /></div>
             <div class="inline-flex items-center justify-center h-7 bg-white/15 backdrop-blur-sm rounded-full"><img src="/tech/neo4j-lockup.svg" alt="Neo4j" class="tech-icon max-h-4 max-w-[72px] w-auto h-auto object-contain" /></div>
@@ -263,9 +265,6 @@ import ossRepos from "../data/oss-repos.json";
             <div class="inline-flex items-center justify-center h-7 bg-white/15 backdrop-blur-sm rounded-full"><img src="/tech/anthropic-wordmark.svg" alt="Anthropic" class="tech-icon max-h-4 max-w-[72px] w-auto h-auto object-contain" /></div>
             <div class="inline-flex items-center justify-center h-7 bg-white/15 backdrop-blur-sm rounded-full"><img src="/tech/openai-wordmark.svg" alt="OpenAI" class="tech-icon max-h-4 max-w-[52px] w-auto h-auto object-contain" /></div>
           </div>
-        </div>
-        <div class="strip-desc absolute bottom-0 left-0 right-0 z-10 px-5 pb-5 opacity-0 transition-opacity duration-300 group-hover:opacity-100 pointer-events-none">
-          <p class="text-sm text-white/95 leading-snug">AI life-story platform. Voice agents conduct documentary-style interviews; a biographer agent synthesizes across sessions. 192K LOC, five LLM providers.</p>
         </div>
       </a>
 
@@ -285,14 +284,12 @@ import ossRepos from "../data/oss-repos.json";
         <div class="absolute inset-0 flex items-center justify-center z-10 pointer-events-none">
           <Image src={initialcommitLogo} alt="InitialCommit logo" class="w-64 h-64 md:w-80 md:h-80 object-contain drop-shadow-lg translate-x-[20%]" />
         </div>
-        <div class="strip-stack absolute bottom-0 left-0 right-0 z-10 px-4 pb-4 transition-opacity duration-300 group-hover:opacity-0">
-          <div class="flex flex-wrap items-center gap-2">
+        <div class="strip-bottom absolute inset-x-0 bottom-0 z-10 p-4 flex flex-col gap-3">
+          <p class="strip-desc text-sm text-white/95 leading-snug">Abu Dhabi builder community. Events, brand identity, and a platform built from scratch for the AI engineer scene in the UAE.</p>
+          <div class="strip-stack flex flex-wrap items-center gap-2">
             <div class="inline-flex items-center justify-center h-7 w-24 bg-white/15 backdrop-blur-sm rounded-full"><img src="/tech/nextjs-wordmark.svg" alt="Next.js" class="tech-icon max-h-4 max-w-[60px] w-auto h-auto object-contain" /></div>
             <div class="inline-flex items-center justify-center h-7 w-24 bg-white/15 backdrop-blur-sm rounded-full"><img src="/tech/prisma-lockup.svg" alt="Prisma" class="tech-icon max-h-4 max-w-[72px] w-auto h-auto object-contain" /></div>
           </div>
-        </div>
-        <div class="strip-desc absolute bottom-0 left-0 right-0 z-10 px-5 pb-5 opacity-0 transition-opacity duration-300 group-hover:opacity-100 pointer-events-none">
-          <p class="text-sm text-white/95 leading-snug">Abu Dhabi builder community. Events, brand identity, and a platform built from scratch for the AI engineer scene in the UAE.</p>
         </div>
       </a>
 
@@ -306,15 +303,13 @@ import ossRepos from "../data/oss-repos.json";
         <div class="absolute inset-0 flex items-center justify-center z-10 pointer-events-none">
           <Image src={onc9Logo} alt="ONC9 logo" class="w-32 h-32 md:w-40 md:h-40 object-contain" />
         </div>
-        <div class="strip-stack absolute bottom-0 left-0 right-0 z-10 px-4 pb-4 transition-opacity duration-300 group-hover:opacity-0">
-          <div class="flex flex-wrap items-center gap-2">
+        <div class="strip-bottom absolute inset-x-0 bottom-0 z-10 p-4 flex flex-col gap-3">
+          <p class="strip-desc text-sm text-neutral-700 leading-snug">AI-native operations studio. Bespoke automation builds and a hosted operating layer for industrial firms.</p>
+          <div class="strip-stack flex flex-wrap items-center gap-2">
             <div class="inline-flex items-center justify-center h-7 w-32 bg-neutral-900 rounded-full"><img src="/tech/tanstack-lockup.svg" alt="TanStack Start" class="tech-icon max-h-4 max-w-[100px] w-auto h-auto object-contain" /></div>
             <div class="inline-flex items-center justify-center h-7 w-24 bg-neutral-900 rounded-full"><img src="/tech/solid-lockup.svg" alt="Solid" class="tech-icon max-h-4 max-w-[72px] w-auto h-auto object-contain" /></div>
             <div class="inline-flex items-center justify-center h-7 w-24 bg-neutral-900 rounded-full"><img src="/tech/drizzle-lockup.svg" alt="Drizzle" class="tech-icon max-h-4 max-w-[72px] w-auto h-auto object-contain" /></div>
           </div>
-        </div>
-        <div class="strip-desc absolute bottom-0 left-0 right-0 z-10 px-5 pb-5 opacity-0 transition-opacity duration-300 group-hover:opacity-100 pointer-events-none">
-          <p class="text-sm text-neutral-700 leading-snug">AI-native operations studio. Bespoke automation builds and a hosted operating layer for industrial firms.</p>
         </div>
       </a>
 
@@ -327,6 +322,34 @@ import ossRepos from "../data/oss-repos.json";
       .strip-card .tech-icon,
       .strip-card-light .tech-icon {
         filter: brightness(0) invert(1);
+      }
+
+      /* Hover-capable pointers (desktop): preserve the original swap.
+         Touch devices fall through to the default markup, where both
+         description and tech stack flow inside .strip-bottom and stay
+         visible together. */
+      @media (hover: hover) {
+        .strip-card .strip-desc,
+        .strip-card-light .strip-desc {
+          position: absolute;
+          inset: auto 0 0 0;
+          padding: 1.25rem;
+          opacity: 0;
+          transition: opacity 300ms;
+          pointer-events: none;
+        }
+        .strip-card .strip-stack,
+        .strip-card-light .strip-stack {
+          transition: opacity 300ms;
+        }
+        .strip-card:hover .strip-desc,
+        .strip-card-light:hover .strip-desc {
+          opacity: 1;
+        }
+        .strip-card:hover .strip-stack,
+        .strip-card-light:hover .strip-stack {
+          opacity: 0;
+        }
       }
     </style>
   </section>
@@ -353,14 +376,14 @@ import ossRepos from "../data/oss-repos.json";
             <span class="text-base">andresCamp</span>
           </a>
         </div>
-        <ul class="space-y-3 pl-1">
+        <ul class="space-y-1 -mx-2">
           {ossRepos.map((repo) => (
             <li class="text-sm leading-relaxed">
               <a
                 href={repo.html_url}
                 target="_blank"
                 rel="noopener noreferrer"
-                class="group block"
+                class="group block min-h-11 py-3 px-2 rounded-md hover:bg-neutral-50 transition-colors"
               ><span class="text-neutral-900 font-medium group-hover:underline">{repo.name}</span><span class="text-neutral-500"> — {repo.description}</span></a>
             </li>
           ))}
@@ -425,8 +448,18 @@ import ossRepos from "../data/oss-repos.json";
       });
 
       item.addEventListener('mousemove', (e) => {
-        cursor.style.left = `${(e as MouseEvent).clientX + 14}px`;
-        cursor.style.top = `${(e as MouseEvent).clientY - 14}px`;
+        const me = e as MouseEvent;
+        const labelW = cursor.offsetWidth;
+        const vw = window.innerWidth;
+        // Default: open to the right of the pointer.
+        // If that would overflow the right edge (e.g. German / UAE flags on
+        // a narrow mobile viewport), flip the label to the left side.
+        let left = me.clientX + 14;
+        if (left + labelW > vw - 8) {
+          left = me.clientX - 14 - labelW;
+        }
+        cursor.style.left = `${left}px`;
+        cursor.style.top = `${me.clientY - 14}px`;
       });
 
       item.addEventListener('mouseleave', () => {

@@ -28,7 +28,10 @@ const { title = "Andrés Campos" } =
 
     <link rel="icon" href="/favicon.ico" />
 
-    <meta name="viewport" content="width=device-width" />
+    <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)" />
+
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="generator" content={Astro.generator} />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -36,10 +39,11 @@ const { title = "Andrés Campos" } =
     <title>{title}</title>
     <ClientRouter />
   </head>
-  <body class="bg-white text-neutral-900 antialiased">
+  <body class="bg-white dark:bg-black text-neutral-900 antialiased [padding-top:env(safe-area-inset-top)] [padding-bottom:env(safe-area-inset-bottom)]">
+    <div class="bg-white min-h-dvh">
     <!-- Nav -->
     <nav
-      class="sticky top-0 z-50 grid grid-cols-[1fr_auto_1fr] items-center px-16 py-4"
+      class="hidden md:grid sticky top-0 z-50 grid-cols-[1fr_auto_1fr] items-center px-4 sm:px-6 md:px-10 lg:px-16 py-3 md:py-4"
     >
       <a href="/" class="text-lg font-semibold tracking-tight justify-self-start">
         <SlidingText from="serdna" to="andres" client:load />
@@ -65,12 +69,13 @@ const { title = "Andrés Campos" } =
             &copy; {new Date().getFullYear()} Andrés Campos
           </p>
         </div>
-        <div class="flex gap-6 text-sm text-neutral-500">
-          <a href="mailto:andres@onc9.com" class="hover:text-neutral-900 transition-colors">Email</a>
-          <a href="https://www.linkedin.com/in/andres-l-campos/" target="_blank" rel="noopener noreferrer" class="hover:text-neutral-900 transition-colors">LinkedIn</a>
-          <a href="https://github.com/andresCamp" target="_blank" rel="noopener noreferrer" class="hover:text-neutral-900 transition-colors">GitHub</a>
+        <div class="flex flex-wrap gap-2 -mx-3 text-sm text-neutral-500">
+          <a href="mailto:andres@onc9.com" class="inline-flex items-center min-h-11 px-3 rounded-md hover:text-neutral-900 transition-colors">Email</a>
+          <a href="https://www.linkedin.com/in/andres-l-campos/" target="_blank" rel="noopener noreferrer" class="inline-flex items-center min-h-11 px-3 rounded-md hover:text-neutral-900 transition-colors">LinkedIn</a>
+          <a href="https://github.com/andresCamp" target="_blank" rel="noopener noreferrer" class="inline-flex items-center min-h-11 px-3 rounded-md hover:text-neutral-900 transition-colors">GitHub</a>
         </div>
       </div>
     </footer>
+    </div>
   </body>
 </html>

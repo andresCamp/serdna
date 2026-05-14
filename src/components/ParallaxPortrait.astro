@@ -31,8 +31,10 @@ const { src, depthSrc, alt = "Portrait", class: className = "", style = "", paus
     --shadow-far-offset-y: 44px;
     --shadow-blur-near: 28px;
     --shadow-blur-far: 64px;
-    width: 563px;
-    height: 656px;
+    /* Mobile: scale to viewport height. Width derived from the 563:656
+       portrait aspect ratio so centering math still works. */
+    height: 50dvh;
+    width: calc(50dvh * 563 / 656);
     position: relative;
     isolation: isolate;
   }
@@ -309,6 +311,52 @@ const { src, depthSrc, alt = "Portrait", class: className = "", style = "", paus
       targetX = Math.max(-0.8, Math.min(0.8, nx));
       targetY = Math.max(-0.8, Math.min(0.8, ny));
     });
+
+    // Mobile gyroscope drives the parallax on touch devices.
+    // First reading is taken as the neutral baseline so we don't snap the
+    // image when the user picks up the phone at an arbitrary angle.
+    let baseGamma: number | null = null;
+    let baseBeta: number | null = null;
+    const TILT_RANGE = 20; // degrees of tilt that map to ±1 in shader space
+
+    function handleOrientation(e: DeviceOrientationEvent) {
+      const gamma = e.gamma; // left/right tilt, -90..90
+      const beta = e.beta;   // front/back tilt, -180..180
+      if (gamma === null || beta === null) return;
+      if (baseGamma === null || baseBeta === null) {
+        baseGamma = gamma;
+        baseBeta = beta;
+        return;
+      }
+      const nx = (gamma - baseGamma) / TILT_RANGE;
+      const ny = (beta - baseBeta) / TILT_RANGE;
+      targetX = Math.max(-0.8, Math.min(0.8, nx));
+      targetY = Math.max(-0.8, Math.min(0.8, ny));
+    }
+
+    const DOE = typeof DeviceOrientationEvent !== "undefined"
+      ? (DeviceOrientationEvent as unknown as { requestPermission?: () => Promise<PermissionState> })
+      : null;
+    const needsPermission = !!(DOE && typeof DOE.requestPermission === "function");
+
+    if (needsPermission) {
+      // iOS 13+: requestPermission must be called from a user gesture.
+      const askGyro = async () => {
+        try {
+          const state = await DOE!.requestPermission!();
+          if (state === "granted") {
+            window.addEventListener("deviceorientation", handleOrientation, { passive: true });
+          }
+        } catch {
+          /* user denied or API unavailable — silently fall back to mousemove */
+        }
+      };
+      document.addEventListener("touchend", askGyro, { once: true, passive: true });
+      document.addEventListener("click", askGyro, { once: true });
+    } else if (typeof window !== "undefined" && "DeviceOrientationEvent" in window) {
+      // Android / non-iOS Safari: no permission gate, just listen.
+      window.addEventListener("deviceorientation", handleOrientation, { passive: true });
+    }
 
     const ro = new ResizeObserver(() => {
       const d = Math.min(window.devicePixelRatio, 2);
