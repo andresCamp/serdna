@@ -29,67 +29,113 @@ import ossRepos from "../data/oss-repos.json";
   <!-- ============================================ -->
   <!-- SECTION 1: HERO                              -->
   <!-- ============================================ -->
-  <section id="hero" class="fixed inset-0 overflow-hidden z-0 bg-white">
+  <section
+    id="hero"
+    class="fixed inset-0 overflow-hidden z-0 bg-[#FAFBFC]"
+  >
+    <!-- Background swoop. Two flat fills with a single curve between them
+         (quadratic Bézier). preserveAspectRatio="none" lets the curve
+         stretch to fill any viewport so it's always visible. -->
+    <svg
+      class="absolute inset-0 w-full h-full"
+      viewBox="0 0 100 100"
+      preserveAspectRatio="none"
+      aria-hidden="true"
+    >
+      <path id="hero-swoop" d="M 25 0 Q 60 45 50 100 L 0 100 L 0 0 Z" fill="#F2F3F5" />
+    </svg>
     <div id="hero-inner" class="h-full origin-center" style="transform: scale(1);">
-    <div class="relative h-full max-w-7xl mx-auto px-4">
-      <!-- Portrait — absolute, bottom center, behind content -->
-      <div class="absolute bottom-0 left-1/2 z-0 -mb-6" style="transform: translateX(calc(-50% + 28px))">
-        <ParallaxPortrait
-          src="/portrait.png"
-          depthSrc="/depthmask.png"
-          alt="Andrés Campos"
-          pauseObserve="#hero-spacer"
-        />
-      </div>
+    <div class="relative h-full max-w-7xl mx-auto px-4 lg:px-8">
 
-      <!-- Content overlay.
-           Mobile: 2-row grid. Row 1 (1fr) holds the text, row 2 (50svh)
-           is the dedicated portrait region — the absolutely-positioned
-           portrait above sits inside this row's footprint, no
-           padding-bottom magic number required.
-           Desktop: reverts to a flex-row with the text bottom-anchored
-           and the portrait still absolute-center per the legacy layout. -->
-      <div class="relative z-[1] grid grid-rows-[minmax(0,1fr)_50svh] lg:grid-rows-none lg:flex lg:flex-row lg:justify-between h-full px-2 lg:px-8">
+      <!--
+        MOBILE: column flow — bubble at top, "tap to enable motion" copy,
+                then text + full-width buttons + shields below.
+        DESKTOP: lg: overrides hoist the portrait into an absolutely-
+                positioned bottom-center anchor and the text block into the
+                bottom-left, preserving the legacy hero composition.
+      -->
+      <div class="flex flex-col items-center justify-end h-full pb-8 lg:pb-0 lg:block">
 
-        <!-- Identity block. Aligned to the end of row 1 on mobile so it
-             sits just above the portrait region; bottom-anchored beside
-             the portrait on desktop. -->
-        <div id="hero-text" class="self-end pb-2 lg:pb-24 origin-center">
-          <h1 class="text-3xl md:text-5xl font-bold tracking-tight leading-[1.1]">
+        <!-- Portrait — bubble on mobile, full-bleed absolute on desktop. -->
+        <div
+          class="relative w-[15.4rem] h-[15.4rem] rounded-full overflow-hidden bg-white shrink-0 select-none
+                 lg:w-auto lg:h-auto lg:rounded-none lg:overflow-visible lg:bg-transparent
+                 lg:absolute lg:bottom-0 lg:left-1/2 lg:-mb-6 lg:translate-x-[calc(-50%+28px)]
+                 z-0"
+        >
+          <div class="absolute -bottom-5 left-1/2 -translate-x-1/2 lg:static lg:translate-x-0">
+            <ParallaxPortrait
+              src="/portrait.png"
+              depthSrc="/depthmask.png"
+              alt="Andrés Campos"
+              pauseObserve="#hero-spacer"
+            />
+          </div>
+        </div>
+
+        <!-- Tap hint (mobile only). -->
+        <p class="mt-3 text-[11px] font-medium uppercase tracking-[0.2em] text-neutral-400 lg:hidden">
+          Tap to enable motion
+        </p>
+
+        <!-- Identity block. Mobile: column-stacked center-aligned, full-width
+             buttons. Desktop: bottom-left anchored, inline buttons, restoring
+             the legacy hero composition. -->
+        <div
+          id="hero-text"
+          class="mt-6 w-full max-w-sm text-center origin-center
+                 lg:mt-0 lg:max-w-none lg:w-auto lg:text-left
+                 lg:absolute lg:bottom-24 lg:left-8 lg:z-[1]"
+        >
+          <h1 class="text-4xl md:text-5xl font-bold tracking-tight leading-[1.05]">
             Andrés Campos
           </h1>
 
-          <p class="mt-3 lg:mt-4 max-w-md text-sm md:text-lg leading-snug md:leading-relaxed text-neutral-600">
+          <p class="mt-3 lg:mt-4 max-w-md mx-auto lg:mx-0 text-base md:text-lg leading-snug md:leading-relaxed text-neutral-600">
             Full stack product engineer. I ship AI products and features end to end, from spec to design to infrastructure.
           </p>
 
-          <div class="mt-4 lg:mt-5 flex flex-nowrap items-center gap-2 lg:flex-wrap lg:gap-3">
-            <a href="https://www.linkedin.com/in/andres-l-campos/" target="_blank" rel="noopener noreferrer" class="inline-flex items-center min-h-11 px-4 lg:px-5 border border-neutral-300 rounded-full text-sm font-medium text-neutral-600 hover:border-neutral-400 transition-colors">LinkedIn</a>
+          <!-- Buttons: full-width stacked on mobile (LinkedIn, GitHub),
+               Resume as tertiary text link. Desktop reverts to inline row. -->
+          <div class="mt-5 flex flex-col gap-2 lg:flex-row lg:flex-wrap lg:items-center lg:gap-3">
+            <a
+              href="https://www.linkedin.com/in/andres-l-campos/"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="flex items-center justify-center w-full min-h-12 px-5 border border-neutral-300 rounded-full text-base font-medium text-neutral-600 hover:border-neutral-400 transition-colors
+                     lg:inline-flex lg:w-auto lg:min-h-11 lg:text-sm"
+            >
+              LinkedIn
+            </a>
             <a
               href="https://github.com/andresCamp"
               target="_blank"
               rel="noopener noreferrer"
               aria-label="GitHub @andresCamp"
-              class="inline-flex items-center min-h-11 gap-1.5 px-1.5 lg:px-2 text-neutral-600 hover:text-neutral-900 transition-colors"
+              class="flex items-center justify-center gap-2 w-full min-h-12 px-5 border border-neutral-300 rounded-full text-base font-medium text-neutral-600 hover:border-neutral-400 transition-colors
+                     lg:inline-flex lg:w-auto lg:min-h-11 lg:px-2 lg:py-0 lg:text-sm lg:border-0 lg:rounded-none lg:gap-1.5 lg:font-medium lg:hover:text-neutral-900"
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-github h-5 w-5" aria-hidden="true">
                 <path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"/>
                 <path d="M9 18c-4.51 2-5-2-7-2"/>
               </svg>
-              <span class="text-sm font-medium">andresCamp</span>
+              <span>andresCamp</span>
             </a>
             <a
               href="/resume"
               target="_blank"
               rel="noopener noreferrer"
-              class="inline-flex items-center min-h-11 px-1.5 lg:px-2 text-sm font-medium text-neutral-600 hover:text-neutral-900 transition-colors"
+              class="inline-flex items-center justify-center w-full min-h-10 py-2 text-sm font-medium text-neutral-500 hover:text-neutral-900 transition-colors
+                     lg:w-auto lg:min-h-11 lg:px-2 lg:py-0 lg:text-neutral-600"
             >
               Resume ↓
             </a>
           </div>
 
-          <div class="mt-3 lg:mt-5 w-full lg:inline-block lg:w-auto">
-            <div class="citizen-row grid grid-cols-4 gap-3 max-w-[18rem] lg:max-w-none py-1 lg:py-2 lg:flex lg:flex-wrap lg:items-center lg:gap-y-3 lg:gap-x-0">
+          <!-- Citizen shields. Mobile: full-row 4-col grid with capped img.
+               Desktop: inline-block flex row at fixed 48px. -->
+          <div class="mt-5 w-full max-w-sm mx-auto lg:max-w-none lg:mx-0 lg:inline-block lg:w-auto">
+            <div class="citizen-row grid grid-cols-4 gap-3 py-2 lg:flex lg:flex-wrap lg:items-center lg:gap-y-3 lg:gap-x-0">
             {[
               { label: "US Citizen", img: "/us.png", color: "#002868" },
               { label: "Mexican Citizen", img: "/mx.png", color: "#006341" },
@@ -97,11 +143,11 @@ import ossRepos from "../data/oss-repos.json";
               { label: "UAE Golden Visa", img: "/ae.png", color: "#C8102E" },
             ].map((item) => (
               <div class="citizen-item flex items-center justify-center cursor-none transition-all duration-300 lg:px-3" data-label={item.label} data-color={item.color}>
-                <img src={item.img} alt={item.label} class="w-full h-auto aspect-square object-contain pointer-events-none lg:w-[48px] lg:h-[48px] lg:aspect-auto" />
+                <img src={item.img} alt={item.label} class="w-full max-w-[52px] h-auto aspect-square object-contain pointer-events-none lg:w-[48px] lg:h-[48px] lg:max-w-none lg:aspect-auto" />
               </div>
             ))}
             </div>
-            <p class="text-[10px] font-medium text-neutral-400 uppercase tracking-widest mt-2 lg:mt-3 text-center max-w-[18rem] lg:max-w-none">Available Globally</p>
+            <p class="text-[11px] lg:text-[10px] font-medium text-neutral-400 uppercase tracking-widest mt-3 text-center">Available Globally</p>
           </div>
         </div>
 
@@ -529,6 +575,19 @@ import ossRepos from "../data/oss-repos.json";
       toggleActions: "play none none reverse",
     },
   });
+
+  // Gentle breathing motion on the hero swoop. Two paths with identical
+  // command structure (M Q L L Z) — GSAP's attr plugin tweens the numbers
+  // in place. yoyo + sine.inOut gives an organic in-and-out swell.
+  if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    gsap.to("#hero-swoop", {
+      attr: { d: "M 22 0 Q 56 52 54 100 L 0 100 L 0 0 Z" },
+      duration: 7,
+      ease: "sine.inOut",
+      repeat: -1,
+      yoyo: true,
+    });
+  }
 </script>
 
 <style>

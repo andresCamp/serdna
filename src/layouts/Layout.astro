@@ -28,22 +28,7 @@ const imageUrl = image.startsWith("http")
   <head>
     <meta charset="utf-8" />
 
-    <link rel="icon" type="image/x-icon" href="/favicons/light/favicon.ico" media="(prefers-color-scheme: dark)" />
-    <link rel="icon" type="image/png" sizes="32x32" href="/favicons/light/favicon-32x32.png" media="(prefers-color-scheme: dark)" />
-    <link rel="icon" type="image/png" sizes="16x16" href="/favicons/light/favicon-16x16.png" media="(prefers-color-scheme: dark)" />
-    <link rel="apple-touch-icon" sizes="180x180" href="/favicons/light/apple-touch-icon.png" media="(prefers-color-scheme: dark)" />
-    <link rel="manifest" href="/favicons/light/site.webmanifest" media="(prefers-color-scheme: dark)" />
-
-    <link rel="icon" type="image/x-icon" href="/favicons/dark/favicon.ico" media="(prefers-color-scheme: light)" />
-    <link rel="icon" type="image/png" sizes="32x32" href="/favicons/dark/favicon-32x32.png" media="(prefers-color-scheme: light)" />
-    <link rel="icon" type="image/png" sizes="16x16" href="/favicons/dark/favicon-16x16.png" media="(prefers-color-scheme: light)" />
-    <link rel="apple-touch-icon" sizes="180x180" href="/favicons/dark/apple-touch-icon.png" media="(prefers-color-scheme: light)" />
-    <link rel="manifest" href="/favicons/dark/site.webmanifest" media="(prefers-color-scheme: light)" />
-
-    <link rel="icon" href="/favicon.ico" />
-
-    <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
-    <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="generator" content={Astro.generator} />
@@ -75,8 +60,7 @@ const imageUrl = image.startsWith("http")
     <link href="https://fonts.googleapis.com/css2?family=Caudex:ital,wght@0,400;0,700;1,400;1,700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet" />
     <ClientRouter />
   </head>
-  <body class="bg-white dark:bg-black text-neutral-900 antialiased [padding-top:env(safe-area-inset-top)] [padding-bottom:env(safe-area-inset-bottom)]">
-    <div class="bg-white min-h-dvh">
+  <body class="bg-white text-neutral-900 antialiased [padding-top:env(safe-area-inset-top)] [padding-bottom:env(safe-area-inset-bottom)]">
     <!-- Nav -->
     <nav
       class="hidden md:grid sticky top-0 z-50 grid-cols-[1fr_auto_1fr] items-center px-4 sm:px-6 md:px-10 lg:px-16 py-3 md:py-4"
@@ -112,6 +96,5 @@ const imageUrl = image.startsWith("http")
         </div>
       </div>
     </footer>
-    </div>
   </body>
 </html>
