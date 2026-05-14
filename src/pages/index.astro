@@ -61,6 +61,14 @@ import ossRepos from "../data/oss-repos.json";
       <path id="hero-wedge" d="M 22 0 Q 35 22 0 55 L 0 0 Z" fill="#F1F3F6" />
       <path id="hero-swoop" d="M 0 100 Q 88 92 100 0 L 100 100 Z" fill="#F4F2EE" />
     </svg>
+    <!-- Bottom-fade overlay (mobile only). Fades whatever SVG color is
+         under it to pure white at the very bottom edge of the hero, so
+         the boundary with the scroll-content underneath is white-to-
+         white and no color seam can exist regardless of overlap. -->
+    <div
+      class="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-b from-transparent to-white lg:hidden"
+      aria-hidden="true"
+    ></div>
     <div id="hero-inner" class="h-full origin-center" style="transform: scale(1);">
     <div class="relative h-full max-w-7xl mx-auto px-4 lg:px-8">
 
