@@ -29,9 +29,25 @@ import ossRepos from "../data/oss-repos.json";
   <!-- ============================================ -->
   <!-- SECTION 1: HERO                              -->
   <!-- ============================================ -->
+  <!--
+    Hero positioning.
+
+    Mobile: `relative min-h-svh` so the hero participates in the document
+    flow and is sized to the SMALLEST visible viewport (URL bar shown).
+    Content can grow past svh and the user scrolls naturally. Safe-area
+    padding is applied INSIDE the hero so the bubble can never render
+    under the notch (body-level safe-area-inset doesn't reach fixed
+    descendants on iOS — that's the bug we hit before).
+
+    Desktop: reverts to `fixed inset-0` so the parallax + rounded
+    scroll-content-rises-over-hero pattern still works.
+  -->
   <section
     id="hero"
-    class="fixed inset-0 overflow-hidden z-0 bg-[#FAFBFC]"
+    class="relative min-h-svh overflow-hidden z-0 bg-[#FAFBFC]
+           [padding-top:env(safe-area-inset-top)]
+           [padding-bottom:env(safe-area-inset-bottom)]
+           lg:fixed lg:inset-0 lg:min-h-0 lg:[padding-top:0] lg:[padding-bottom:0]"
   >
     <!-- Background swoop. Two flat fills with a single curve between them
          (quadratic Bézier). preserveAspectRatio="none" lets the curve
@@ -42,7 +58,8 @@ import ossRepos from "../data/oss-repos.json";
       preserveAspectRatio="none"
       aria-hidden="true"
     >
-      <path id="hero-swoop" d="M 25 0 Q 60 45 50 100 L 0 100 L 0 0 Z" fill="#F2F3F5" />
+      <path id="hero-wedge" d="M 22 0 Q 35 22 0 55 L 0 0 Z" fill="#F1F3F6" />
+      <path id="hero-swoop" d="M 0 100 Q 88 92 100 0 L 100 100 Z" fill="#F4F2EE" />
     </svg>
     <div id="hero-inner" class="h-full origin-center" style="transform: scale(1);">
     <div class="relative h-full max-w-7xl mx-auto px-4 lg:px-8">
@@ -54,7 +71,7 @@ import ossRepos from "../data/oss-repos.json";
                 positioned bottom-center anchor and the text block into the
                 bottom-left, preserving the legacy hero composition.
       -->
-      <div class="flex flex-col items-center justify-end h-full pb-8 lg:pb-0 lg:block">
+      <div class="flex flex-col items-center justify-end min-h-[calc(100svh-env(safe-area-inset-top)-env(safe-area-inset-bottom))] pt-6 pb-12 lg:min-h-0 lg:h-full lg:pt-0 lg:pb-0 lg:block">
 
         <!-- Portrait — bubble on mobile, full-bleed absolute on desktop. -->
         <div
@@ -156,14 +173,21 @@ import ossRepos from "../data/oss-repos.json";
     </div>
   </section>
 
-  <!-- Spacer: pushes scrollable content below the fixed hero. The hero's
-       ParallaxPortrait observes this element via IntersectionObserver and
-       pauses its WebGL render loop once this spacer leaves the viewport
-       (i.e., the visitor has scrolled past the hero). Re-enters → resumes. -->
-  <div id="hero-spacer" class="h-dvh"></div>
+  <!-- Spacer: only needed on desktop where the hero is fixed and the
+       scrollable content needs an empty placeholder of viewport height
+       to scroll past. On mobile the hero is in the document flow
+       already, so no spacer is required; the ParallaxPortrait's
+       IntersectionObserver still resolves the (display:none) target
+       gracefully — it just stays in the "intersecting" state until lg+. -->
+  <div id="hero-spacer" class="hidden lg:block lg:h-dvh"></div>
 
-  <!-- Scrollable content — rises over the fixed hero -->
-  <div id="scroll-content" class="relative z-10 bg-white -mt-px rounded-t-[3.5rem] [filter:drop-shadow(0_-6px_12px_rgba(0,0,0,0.12))]">
+  <!-- Scrollable content — rises over the fixed hero.
+       Mobile: -mt-4 (16px) is just enough overlap that the SVG swoop's
+       bottom-edge color is hidden behind the white rounded-t card,
+       without the rounded arc visibly climbing into the citizen-row.
+       Desktop: -mt-px (1px) keeps the legacy seamless lift over the
+       fixed hero. -->
+  <div id="scroll-content" class="relative z-10 bg-white -mt-4 lg:-mt-px rounded-t-[3.5rem] [filter:drop-shadow(0_-6px_12px_rgba(0,0,0,0.12))]">
 
   <!-- ============================================ -->
   <!-- SECTION 2: FEATURED WORK                     -->
@@ -581,8 +605,15 @@ import ossRepos from "../data/oss-repos.json";
   // in place. yoyo + sine.inOut gives an organic in-and-out swell.
   if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
     gsap.to("#hero-swoop", {
-      attr: { d: "M 22 0 Q 56 52 54 100 L 0 100 L 0 0 Z" },
+      attr: { d: "M 0 100 Q 84 88 100 4 L 100 100 Z" },
       duration: 7,
+      ease: "sine.inOut",
+      repeat: -1,
+      yoyo: true,
+    });
+    gsap.to("#hero-wedge", {
+      attr: { d: "M 20 0 Q 32 25 0 60 L 0 0 Z" },
+      duration: 9,
       ease: "sine.inOut",
       repeat: -1,
       yoyo: true,
