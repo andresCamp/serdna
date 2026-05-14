@@ -31,10 +31,12 @@ const { src, depthSrc, alt = "Portrait", class: className = "", style = "", paus
     --shadow-far-offset-y: 44px;
     --shadow-blur-near: 28px;
     --shadow-blur-far: 64px;
-    /* Mobile: scale to viewport height. Width derived from the 563:656
-       portrait aspect ratio so centering math still works. */
-    height: 50dvh;
-    width: calc(50dvh * 563 / 656);
+    /* Mobile: occupy the dedicated portrait row of the hero grid. svh
+       (small viewport height) is stable across iOS Safari URL-bar state
+       changes, so the row above never gets squeezed when the bar opens.
+       Width is derived from the 563:656 portrait aspect ratio. */
+    height: 50svh;
+    width: calc(50svh * 563 / 656);
     position: relative;
     isolation: isolate;
   }
